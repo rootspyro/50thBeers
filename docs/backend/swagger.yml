@@ -1,0 +1,33 @@
+swagger: "2.0"
+info:
+  title: 50thBeers
+  description: 50th Beers blog API
+  contact:
+    email: root.spyro@gmail.com
+  license:
+    name: MIT
+    url: https://choosealicense.com/licenses/mit/
+  version: 1.0.0
+  
+
+paths: 
+  /healt:
+    get:
+      produces:
+        - application/json
+      responses:
+        200:
+          description: server is running
+          schema:
+            $ref: '#/definitions/default'
+            
+
+definitions:
+
+  default:
+    type: object
+    properties:
+      status:
+        type: string
+      data:
+        type: string
