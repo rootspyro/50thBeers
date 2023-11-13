@@ -11,16 +11,335 @@ info:
   
 
 paths: 
-  /healt:
+  /health:
     get:
       produces:
         - application/json
+      tags:
+        - Health
       responses:
         200:
           description: server is running
           schema:
             $ref: '#/definitions/default'
             
+  # -----------------------------------
+  #            USERS PATHS
+  # -----------------------------------
+  /login:
+    post:
+      produces:
+        - application/json
+        
+      tags:
+        - Users
+      
+      parameters:
+        - in: body
+          name: user
+          schema:
+            type: object
+            properties:
+              user:
+                type: string
+                example: username or email
+              password:
+                type: string
+        
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+                
+              data:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: JWT token string
+                  
+                  name:
+                    type: string
+                    example: username
+                  
+                  sub:
+                    type: string
+                    example: userId
+                    
+                  exp:
+                    type: number
+                    example: 3600
+          
+        401:
+          description: unauthorized
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: false
+                
+              data:
+                type: string
+                example: User could not be authenticated
+                
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+  # -----------------------------------
+  #            TAGS PATHS
+  # -----------------------------------
+  /tags:
+    get:
+      summary: List of Tags
+      parameters:
+        - name: tagname
+          in: query
+          type: string
+          required: false
+      tags:
+        - Tags
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  itemsFound:
+                    type: number
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/definitions/tagObject"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+                  
+    post:
+      summary: Create a tag
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              tagname:
+                type: string
+      tags:
+        - Tags
+      responses:
+        201:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+              data: 
+                $ref: "#/definitions/tagObject"
+        409:
+          description: item already exist
+          schema:
+            $ref: "#/definitions/conflict"
+        
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+                
+                
+  /tags/{tagId}:
+    get:
+      summary: get a single tag
+      parameters:
+        - name: tagId
+          in: path
+          type: string
+          required: true
+      tags:
+        - Tags
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/tagObject"
+                
+        404:
+          description: item not found
+          schema:
+            $ref: "#/definitions/notFound"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+    
+    patch:
+      summary: update a tag
+      parameters:
+        - name: tagId
+          in: path
+          type: string
+          required: true
+          
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              tagname:
+                type: string
+      tags:
+        - Tags
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/tagObject"
+                
+        404:
+          description: item not found
+          schema:
+            $ref: "#/definitions/notFound"
+    
+        409:
+          description: item already exist
+          schema:
+            $ref: "#/definitions/conflict"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+    delete:
+      summary: delete a tag
+      parameters:
+        - name: tagId
+          in: path
+          type: string
+          required: true
+      tags:
+        - Tags
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+              data:
+                type: string
+                example: item successfully deleted
+                
+  # -----------------------------------
+  #         COUNTRIES PATHS
+  # -----------------------------------
+  
+  /countries:
+    get:
+      summary: List of countries
+      tags:
+        - Countries
+      parameters:
+        - name: country
+          description: country name
+          in: query
+          type: string
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+              data:
+                type: array
+                items:
+                  $ref: "#/definitions/countryObject"
+      
+    post:
+      summary: Create a new country
+      tags:
+        - Countries
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              countryName:
+                type: string
+                example: Spain
+      responses:
+        201:
+          description: ok
+          schema:
+            type: object
+            properties:
+              status:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/countryObject"
+                
+        409:
+          description: already exist
+          schema:
+            $ref: "#/definitions/conflict"
+        
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+  
+tags:
+  - name: Health
+    description: Checking functions
+    
+  - name: Users
+    description: Paths for User sessions and validation
+
+  - name: Tags
+    description: Tags CRUD
+    
+  - name: Countries
+    description: Countries CRUD
 
 definitions:
 
@@ -28,6 +347,78 @@ definitions:
     type: object
     properties:
       status:
-        type: string
+        type: boolean
       data:
         type: string
+        
+  notFound:
+    description: 404 not found
+    type: object
+    properties:
+      status:
+        type: boolean
+        example: false
+      data:
+        type: string
+        example: item not found
+        
+  conflict:
+    description: 409 conflict
+    type: object
+    properties:
+      status:
+        type: boolean
+        example: false
+      data:
+        type: string
+        example: Item already exist
+        
+  serverError:
+    description: 500 Internal Server Error
+    type: object
+    properties:
+      status:
+        type: boolean
+        example: false
+      data:
+        type: string
+        example: Something went wrong
+        
+  tagObject:
+    type: object
+    properties:
+      id:
+        type: number
+        example: 1
+      tagname:
+        type: string
+        example: challenge
+      createdAt:
+        type: string
+        example: 2001-01-10
+      updatedAt:
+        type: string
+        example: 2002-02-20
+      status:
+        type: string
+        example: PUBLIC
+    
+  countryObject:
+    type: object
+    properties:
+      id:
+        type: number
+        example: 1
+      countryName:
+        type: string
+        example: Spain
+      createdAt:
+        type: string
+        example: 2001-01-10
+      updatedAt:
+        type: string
+        example: 2002-02-20
+      status:
+        type: string
+        example: PUBLIC
+    
