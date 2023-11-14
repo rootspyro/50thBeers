@@ -52,7 +52,7 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
                 
@@ -80,7 +80,7 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: false
                 
@@ -112,7 +112,7 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
               data:
@@ -149,7 +149,7 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
               data: 
@@ -181,7 +181,7 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
               data:
@@ -221,7 +221,7 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
               data:
@@ -257,12 +257,22 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
               data:
                 type: string
                 example: item successfully deleted
+                
+        404:
+          description: not found
+          schema:
+            $ref: "#/definitions/notFound"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
                 
   # -----------------------------------
   #         COUNTRIES PATHS
@@ -284,13 +294,19 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
               data:
-                type: array
-                items:
-                  $ref: "#/definitions/countryObject"
+                type: object
+                properties:
+                  itemsFound:
+                    type: number
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/definitions/countryObject"
       
     post:
       summary: Create a new country
@@ -312,7 +328,7 @@ paths:
           schema:
             type: object
             properties:
-              status:
+              success:
                 type: boolean
                 example: true
               data:
@@ -327,6 +343,612 @@ paths:
           description: server error
           schema:
             $ref: "#/definitions/serverError"
+    
+  /countries/{countryId}:
+    get:
+      summary: get a single country
+      parameters:
+        - name: countryId
+          in: path
+          type: number
+          required: true
+      tags:
+        - Countries
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/countryObject"
+        404:
+          description: not found
+          schema:
+            $ref: "#/definitions/notFound"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+
+    patch:
+      summary: update a country
+      parameters:
+        - name: countryId
+          in: path
+          type: string
+          required: true
+          
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              countryName:
+                type: string
+      tags:
+        - Countries
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/countryObject"
+                
+        404:
+          description: item not found
+          schema:
+            $ref: "#/definitions/notFound"
+    
+        409:
+          description: item already exist
+          schema:
+            $ref: "#/definitions/conflict"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+    delete:
+      summary: delete a country
+      parameters:
+        - name: countryId
+          in: path
+          type: string
+          required: true
+      tags:
+        - Countries
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: string
+                example: item successfully 
+        404:
+          description: not found
+          schema:
+            $ref: "#/definitions/notFound"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+              
+                
+  # -----------------------------------
+  #         COUNTRIES PATHS
+  # -----------------------------------
+  
+  /locations:
+    get:
+      summary: list of locations
+      tags:
+        - Locations
+      parameters:
+        - name: locationName
+          in: query
+          type: string
+          required: false
+          
+        - name: status
+          in: query
+          type: string
+          required: false
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  itemsFound:
+                    type: number
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/definitions/locationObject"
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+    
+    post:
+      summary: create a new location
+      tags:
+        - Locations
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              locationName:
+                type: string
+                example: Homo Sibaris
+              mapsLink:
+                type: string
+                example: https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d11975.595085269204!2d2.1388206!3d41.376284!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a4988421daba0d%3A0xf1efff1748822f9c!2sHomo%20Sibaris!5e0!3m2!1ses!2ses!4v1699977760682!5m2!1ses!2ses
+              comments:
+                type: string
+                example: A good place to drink artesanal beer
+      responses:
+        201:
+          description: created
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/locationObject"
+        409:
+          description: item already exist
+          schema:
+            $ref: "#/definitions/conflict"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+  /locations/{locationId}:
+    get:
+      summary: get single location
+      parameters:
+        - name: locationId
+          in: path
+          type: string
+          required: true
+      tags:
+        - Locations
+      responses:
+        200: 
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/locationObject"
+                
+        404:
+          description: not found
+          schema:
+            $ref: "#/definitions/notFound"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+    patch:
+      summary: update a location
+      parameters:
+        - name: locationId
+          type: string
+          in: path
+          required: true
+          
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              locationName:
+                type: string
+                example: Homo Sibaris
+              mapsLink:
+                type: string
+                example: https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d11975.595085269204!2d2.1388206!3d41.376284!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a4988421daba0d%3A0xf1efff1748822f9c!2sHomo%20Sibaris!5e0!3m2!1ses!2ses!4v1699977760682!5m2!1ses!2ses
+              comments:
+                type: string
+                example: A good place to drink artesanal beer
+      tags:
+        - Locations
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success: 
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/locationObject"
+                
+        404:
+          description: not found
+          schema: 
+            $ref: "#/definitions/notFound"
+            
+        409:
+          description: item alrady exist
+          schema:
+            $ref: "#/definitions/conflict"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+    delete:
+      summary: delete a location
+      parameters:
+        - name: locationId
+          in: path
+          type: string
+          required: true
+      tags:
+        - Locations
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: string
+                example: item successfully deleted
+                
+        404:
+          description: not found
+          schema:
+            $ref: "#/definitions/notFound"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+          
+          
+  
+  # -----------------------------------
+  #              POSTS
+  # -----------------------------------
+  
+  /posts:
+    get: 
+      summary: get the list of posts
+      parameters:
+        - name: limit
+          in: query
+          type: number
+          required: false
+          
+        - name: offset
+          in: query
+          type: number
+          required: false
+        
+        - name: orderBY
+          in: query
+          type: string
+          description: table to order by
+          required: false
+          
+        - name: orderDirection
+          in: query
+          type: string
+          description: ASC or DESC
+          required: false
+          
+        - name: title
+          in: query
+          type: string
+          description: drink's name
+          required: false
+          
+        - name: tag
+          in: query
+          type: number
+          description: tag id
+          required: false
+          
+        - name: status
+          in: query
+          type: string
+          required: true
+        
+        - name: rating
+          in: query
+          type: number
+          required: true
+        
+        - name: country
+          in: query
+          type: number
+          description: country id
+          required: false
+  
+        - name: location
+          in: query
+          type: number
+          description: location id
+          required: false
+          
+      tags:
+        - Posts
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success: 
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  itemsFound:
+                    type: number
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/definitions/locationObject"
+                      
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+    
+    post:
+      summary: create a new post
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              drinkName:
+                type: string
+                example: Estrella Damm
+              drinkType:
+                type: string
+                example: Pilsen
+              countryId:
+                type: number
+                example: 1
+              tastingDate:
+                type: string
+                example: 2023-10-18
+              abv:
+                type: number
+                example: 5.4
+              rating:
+                type: number
+                example: 3
+              pictureUrl:
+                type: string
+                example: https://www.estrelladamm.com/themes/custom/estrelladamm/img/cerveza-mediterranea/mediterranea-bottle-ca-desk.jpg
+              locationId:
+                type: number
+                example: 2
+              view:
+                type: string
+              nose:
+                type: string
+              mouth:
+                type: string
+              comments:
+                type: string
+      tags:
+        - Posts
+      responses:
+        201:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/postObject"
+                
+        409:
+          description: item already exist
+          schema:
+            $ref: "#/definitions/conflict"
+        
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+  /posts/{postId}:
+    get:
+      summary: get a single post
+      parameters:
+        - name: postId
+          type: string
+          in: path
+          required: true
+      tags:
+        - Posts
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/postObject"
+                
+        404:
+          description: item not found
+          schema:
+            $ref: "#/definitions/notFound"
+        
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+    patch:
+      summary: update a post
+      parameters:
+        - name: postId
+          type: string
+          in: path
+          required: true
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              drinkName:
+                type: string
+                example: Estrella Damm
+              drinkType:
+                type: string
+                example: Pilsen
+              countryId:
+                type: number
+                example: 1
+              tastingDate:
+                type: string
+                example: 2023-10-18
+              abv:
+                type: number
+                example: 5.4
+              rating:
+                type: number
+                example: 3
+              pictureUrl:
+                type: string
+                example: https://www.estrelladamm.com/themes/custom/estrelladamm/img/cerveza-mediterranea/mediterranea-bottle-ca-desk.jpg
+              locationId:
+                type: number
+                example: 2
+              view:
+                type: string
+              nose:
+                type: string
+              mouth:
+                type: string
+              comments:
+                type: string
+      tags:
+        - Posts
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                $ref: "#/definitions/postObject"
+                
+        404:
+          description: item not found
+          schema:
+            $ref: "#/definitions/notFound"
+            
+        409:
+          description: item already exist
+          schema:
+            $ref: "#/definitions/conflict"
+        
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+            
+            
+    delete:
+      summary: delete a post
+      tags:
+        - Posts
+      parameters:
+        - name: postId
+          type: string
+          in: path
+          required: true
+      responses:
+        200:
+          description: ok
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: string
+                example: item successfully deleted
+        404:
+          description: item not found
+          schema:
+            $ref: "#/definitions/notFound"
+            
+        500:
+          description: server error
+          schema:
+            $ref: "#/definitions/serverError"
+  # -----------------------------------
+  #               TAGS
+  # -----------------------------------
   
 tags:
   - name: Health
@@ -340,13 +962,23 @@ tags:
     
   - name: Countries
     description: Countries CRUD
+    
+  - name: Locations
+    description: Locations CRUD
+    
+  - name: Posts
+    description: Posts CRUD 
+    
+  # -----------------------------------
+  #             DEFINITIONS
+  # -----------------------------------
 
 definitions:
 
   default:
     type: object
     properties:
-      status:
+      success:
         type: boolean
       data:
         type: string
@@ -355,7 +987,7 @@ definitions:
     description: 404 not found
     type: object
     properties:
-      status:
+      success:
         type: boolean
         example: false
       data:
@@ -366,7 +998,7 @@ definitions:
     description: 409 conflict
     type: object
     properties:
-      status:
+      success:
         type: boolean
         example: false
       data:
@@ -377,7 +1009,7 @@ definitions:
     description: 500 Internal Server Error
     type: object
     properties:
-      status:
+      success:
         type: boolean
         example: false
       data:
@@ -421,4 +1053,86 @@ definitions:
       status:
         type: string
         example: PUBLIC
-    
+  
+  locationObject:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 1a79a4d60de6718e8e5b326e338ae533
+      locationName:
+        type: string
+        example: 2D2Dspuma
+      mapsLink:
+        type: string
+        example: "https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d11967.085193103783!2d2.179417!3d41.422483!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12a4bd2b62a010fb%3A0x8ed384a43e80fd1b!2sCervecer%C3%ADa%202D2Dspuma%20-%20Cervecer%C3%ADa!5e0!3m2!1ses!2ses!4v1699976932448!5m2!1ses!2ses"
+      createdAt:
+        type: string
+        example: 2023 - 10 - 10
+      publicatedAt:
+        type: string
+        example: 2023 - 10 - 10
+      updatedAT:
+        type: string
+        example:
+      comments:
+        type: string
+        example: My favorite pub
+      status:
+        type: string
+        example: PUBLIC
+        
+  postObject:
+    type: object
+    properties:
+      id: 
+        type: string
+        example: 1a79a4d60de6718e8e5b326e338ae533
+      drinkName:
+        type: string
+        example: Estrella Damm
+      drinkTYpe:
+        type: string
+        example: Pilsen
+      countryId:
+        type: number
+        example: 1
+      tastingDate:
+        type: string
+        example: 2023-10-18
+      abv:
+        type: number
+        example: 4.5
+      rating:
+        type: number
+        example: 3
+      pictureUrl:
+        type: string
+        example: https://www.estrelladamm.com/themes/custom/estrelladamm/img/cerveza-mediterranea/mediterranea-bottle-ca-desk.jpg
+      locationId:
+        type: number
+        example: 2
+      view:
+        type: string
+        example: 
+      nose:
+        type: string
+        example: 
+      mouth:
+        type: string
+        example:
+      comments:
+        type: string
+        example:
+      createdAt:
+        type: string
+        example: 2023-10-20
+      publicatedAt:
+        type: string
+        example: 2023-10-20
+      updatedAt:
+        type: string
+        example:
+      status:
+        type: string
+        example: PUBLIC
