@@ -8,8 +8,13 @@ info:
     name: MIT
     url: https://choosealicense.com/licenses/mit/
   version: 1.0.0
-  
-
+host: api.example.com
+basePath: /v1
+securityDefinitions:
+  JWT:
+    type: apiKey
+    name: Authorization
+    in: header
 paths: 
   /health:
     get:
@@ -132,6 +137,8 @@ paths:
                   
     post:
       summary: Create a tag
+      security:
+        - JWT: []
       parameters:
         - name: body
           in: body
@@ -199,6 +206,8 @@ paths:
     
     patch:
       summary: update a tag
+      security:
+        - JWT: []
       parameters:
         - name: tagId
           in: path
@@ -244,6 +253,8 @@ paths:
             
     delete:
       summary: delete a tag
+      security:
+        - JWT: []
       parameters:
         - name: tagId
           in: path
@@ -310,6 +321,8 @@ paths:
       
     post:
       summary: Create a new country
+      security:
+        - JWT: []
       tags:
         - Countries
       parameters:
@@ -376,6 +389,8 @@ paths:
 
     patch:
       summary: update a country
+      security:
+        - JWT: []
       parameters:
         - name: countryId
           in: path
@@ -421,6 +436,8 @@ paths:
             
     delete:
       summary: delete a country
+      security:
+        - JWT: []
       parameters:
         - name: countryId
           in: path
@@ -496,6 +513,8 @@ paths:
     
     post:
       summary: create a new location
+      security:
+        - JWT: []
       tags:
         - Locations
       parameters:
@@ -569,6 +588,8 @@ paths:
             
     patch:
       summary: update a location
+      security:
+        - JWT: []
       parameters:
         - name: locationId
           type: string
@@ -621,6 +642,8 @@ paths:
             
     delete:
       summary: delete a location
+      security:
+        - JWT: []
       parameters:
         - name: locationId
           in: path
@@ -746,6 +769,8 @@ paths:
     
     post:
       summary: create a new post
+      security:
+        - JWT: []
       parameters:
         - name: body
           in: body
@@ -843,6 +868,8 @@ paths:
             
     patch:
       summary: update a post
+      security:
+        - JWT: []
       parameters:
         - name: postId
           type: string
@@ -918,6 +945,8 @@ paths:
             
     delete:
       summary: delete a post
+      security:
+        - JWT: []
       tags:
         - Posts
       parameters:
@@ -1136,3 +1165,4 @@ definitions:
       status:
         type: string
         example: PUBLIC
+        
