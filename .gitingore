@@ -22,4 +22,4 @@
 go.work
 
 ### Env variables ###
-.env
+*.env
