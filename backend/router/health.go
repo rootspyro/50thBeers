@@ -4,6 +4,7 @@ package router
 
 import (
 	"50thbeers/db"
+	"50thbeers/models"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -31,10 +32,7 @@ func ( hr *HealthRouter ) Setup() {
 
          log.Printf("Database PING error: %v", err)
 
-         ctx.JSON(500, gin.H{
-            "success": false,
-            "data": "Something went wrong!",
-         })
+         models.ServerError(ctx);
 
          return
       }
