@@ -24,9 +24,13 @@ func( sr *SetupRouter ) Setup() {
 
    v1 := sr.server.Group("v1");
 
+   // TABLES SETUP
+
+   usersTable := db.NewUsersTable(sr.db)
+
    // HANDLERS SETUP
 
-   userHandler := handlers.NewUsersHandler(sr.db);
+   userHandler := handlers.NewUsersHandler(usersTable);
 
    // PATHS SETUP
    healthPath := NewHealthRouter(v1, sr.db)
