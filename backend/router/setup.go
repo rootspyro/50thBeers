@@ -3,6 +3,7 @@ package router
 import (
 	"50thbeers/db"
 	"50thbeers/handlers"
+	"50thbeers/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,9 +38,9 @@ func( sr *SetupRouter ) Setup() {
    // NOT FOUND
    sr.server.NoRoute(func(ctx *gin.Context) {
 
-      ctx.JSON(404, gin.H{
-         "status": false,
-         "data": "404 Page not found",
+      ctx.JSON(404, models.BasicResponse{
+         Success: false,
+         Data: "404 Page not found...",
       })
    })
 }
