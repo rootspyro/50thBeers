@@ -26,7 +26,7 @@ func( sr *SetupRouter ) Setup() {
 
    // HANDLERS SETUP
 
-   userHandler := handlers.NewUsersHandler();
+   userHandler := handlers.NewUsersHandler(sr.db);
 
    // PATHS SETUP
    healthPath := NewHealthRouter(v1, sr.db)

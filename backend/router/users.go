@@ -25,7 +25,13 @@ func ( ur *UsersRouter ) Setup() {
 
    ur.group.GET("/users", func(ctx *gin.Context) {
 
-      data := ur.handler.GetItems()
+      data, err := ur.handler.GetItems()
+
+      if err != nil {
+
+         models.ServerError(ctx)
+         return
+      }
 
       models.OK(ctx, data)
 

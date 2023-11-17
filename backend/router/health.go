@@ -36,11 +36,8 @@ func ( hr *HealthRouter ) Setup() {
 
          return
       }
-      
-      ctx.JSON(200, gin.H{
-         "success": true,
-         "data": "Server is running!",
-      })
+
+      models.OK(ctx, "Server is running") 
    })
 }
 
