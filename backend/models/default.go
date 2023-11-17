@@ -21,6 +21,17 @@ func OK( ctx *gin.Context, data any ) {
    ctx.JSON(200, response) 
 }
 
+// HTTP 400 INVALID REQUEST 
+func InvalidRequest( ctx *gin.Context ) {
+   
+   response := BasicResponse{
+      Success: false,
+      Data: "Invalid request!",
+   }
+
+   ctx.JSON(400, response)
+}
+
 // HTTP 404 NOT FOUND
 func NotFound( ctx *gin.Context ) {
    

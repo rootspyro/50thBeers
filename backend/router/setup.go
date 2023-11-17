@@ -1,9 +1,11 @@
 package router
 
 import (
+	"50thbeers/auth"
 	"50thbeers/db"
 	"50thbeers/handlers"
 	"50thbeers/models"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +26,10 @@ func( sr *SetupRouter ) Setup() {
 
    v1 := sr.server.Group("v1");
 
+   // AUTH SETUP
+
+   authHandler := auth.NewAuthHandler(os.Getenv("SECRET"))
+
    // TABLES SETUP
 
    usersTable := db.NewUsersTable(sr.db)
@@ -34,7 +40,7 @@ func( sr *SetupRouter ) Setup() {
 
    // PATHS SETUP
    healthPath := NewHealthRouter(v1, sr.db)
-   usersPath  := NewUsersRouter(v1, userHandler)
+   usersPath  := NewUsersRouter(v1, userHandler, authHandler)
 
    healthPath.Setup()
    usersPath.Setup()

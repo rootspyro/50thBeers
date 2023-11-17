@@ -34,3 +34,14 @@ func( uh *UsersHandler ) GetItems() (models.UserCollection, error) {
 
    return userData, nil
 }
+
+func( uh *UsersHandler ) SearchItem(user string) (models.User, error) {
+
+   data, err := uh.usersTable.SearchUser(user)
+
+   if err != nil {
+      return data, err
+   }
+   return data, nil 
+
+}
