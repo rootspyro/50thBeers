@@ -2,6 +2,7 @@ package router
 
 import (
 	"50thbeers/db"
+	"50thbeers/handlers"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,10 +23,16 @@ func( sr *SetupRouter ) Setup() {
 
    v1 := sr.server.Group("v1");
 
+   // HANDLERS SETUP
+
+   userHandler := handlers.NewUsersHandler();
+
    // PATHS SETUP
-   healthPath := NewHealthRouter(v1, sr.db);
+   healthPath := NewHealthRouter(v1, sr.db)
+   usersPath  := NewUsersRouter(v1, userHandler)
 
    healthPath.Setup()
+   usersPath.Setup()
 
    // NOT FOUND
    sr.server.NoRoute(func(ctx *gin.Context) {

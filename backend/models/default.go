@@ -6,7 +6,19 @@ import "github.com/gin-gonic/gin"
 
 type BasicResponse struct {
    Success bool   `json:"success"`
-   Data    string `json:"data"`
+   Data    any `json:"data"`
+}
+
+// HTTP 200 OK
+
+func OK( ctx *gin.Context, data any ) {
+
+   response := BasicResponse {
+      Success: true,
+      Data: data,
+   }
+
+   ctx.JSON(200, response) 
 }
 
 // HTTP 404 NOT FOUND
