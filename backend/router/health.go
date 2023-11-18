@@ -2,26 +2,42 @@
 
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"50thbeers/db"
+	"50thbeers/models"
+	"log"
+
+	"github.com/gin-gonic/gin"
+)
 
 type HealthRouter struct {
    group *gin.RouterGroup
+   db    *db.DB
 }
 
-func NewHealthRouter( g *gin.RouterGroup ) *HealthRouter {
+func NewHealthRouter( g *gin.RouterGroup, db *db.DB ) *HealthRouter {
    return &HealthRouter{
       group: g,
+      db: db,
    }
 }
 
 func ( hr *HealthRouter ) Setup() {
   
    hr.group.GET("/health", func(ctx *gin.Context) {
-      
-      ctx.JSON(200, gin.H{
-         "success": true,
-         "data": "Server is running!",
-      })
-   });
+
+      err := hr.db.Conn.Ping()
+
+      if err != nil {
+
+         log.Printf("Database PING error: %v", err)
+
+         models.ServerError(ctx);
+
+         return
+      }
+
+      models.OK(ctx, "Server is running") 
+   })
 }
 

@@ -1,14 +1,24 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"50thbeers/auth"
+	"50thbeers/db"
+	"50thbeers/handlers"
+	"50thbeers/models"
+	"os"
+
+	"github.com/gin-gonic/gin"
+)
 
 type SetupRouter struct {
    server *gin.Engine
+   db     *db.DB
 }
 
-func NewSetupRouter(s *gin.Engine) *SetupRouter {
+func NewSetupRouter(s *gin.Engine, db *db.DB) *SetupRouter {
    return &SetupRouter{
       server: s,
+      db: db,
    }
 }
 
@@ -16,17 +26,31 @@ func( sr *SetupRouter ) Setup() {
 
    v1 := sr.server.Group("v1");
 
-   // PATHS SETUP
-   healthPath := NewHealthRouter(v1);
+   // AUTH SETUP
 
-   healthPath.Setup();
+   authHandler := auth.NewAuthHandler(os.Getenv("SECRET"))
+
+   // TABLES SETUP
+
+   usersTable := db.NewUsersTable(sr.db)
+
+   // HANDLERS SETUP
+
+   userHandler := handlers.NewUsersHandler(usersTable);
+
+   // PATHS SETUP
+   healthPath := NewHealthRouter(v1, sr.db)
+   usersPath  := NewUsersRouter(v1, userHandler, authHandler)
+
+   healthPath.Setup()
+   usersPath.Setup()
 
    // NOT FOUND
    sr.server.NoRoute(func(ctx *gin.Context) {
 
-      ctx.JSON(404, gin.H{
-         "status": false,
-         "data": "404 Page not found",
+      ctx.JSON(404, models.BasicResponse{
+         Success: false,
+         Data: "404 Page not found...",
       })
-   });
+   })
 }

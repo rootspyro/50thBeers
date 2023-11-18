@@ -6,7 +6,41 @@ import "github.com/gin-gonic/gin"
 
 type BasicResponse struct {
    Success bool   `json:"success"`
-   Data    string `json:"data"`
+   Data    any `json:"data"`
+}
+
+// HTTP 200 OK
+
+func OK( ctx *gin.Context, data any ) {
+
+   response := BasicResponse {
+      Success: true,
+      Data: data,
+   }
+
+   ctx.JSON(200, response) 
+}
+
+// HTTP 400 INVALID REQUEST 
+func InvalidRequest( ctx *gin.Context ) {
+   
+   response := BasicResponse{
+      Success: false,
+      Data: "Invalid request!",
+   }
+
+   ctx.JSON(400, response)
+}
+
+// HTTP 401 UNAUTHORIZED 
+func Unauthorized( ctx *gin.Context ) {
+   
+   response := BasicResponse{
+      Success: false,
+      Data: "Unauthorized",
+   }
+
+   ctx.JSON(401, response)
 }
 
 // HTTP 404 NOT FOUND
