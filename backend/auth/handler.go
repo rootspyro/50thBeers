@@ -2,8 +2,12 @@ package auth
 
 import (
 	"50thbeers/models"
+	"log"
+	"os"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 )
 
@@ -32,4 +36,36 @@ func( ah *AuthHandler ) GenerateToken( data models.User ) (string, error) {
    }
 
    return tokenString, nil
+}
+
+func( ah *AuthHandler ) AuthMiddleware() gin.HandlerFunc {
+   return func(ctx *gin.Context) {
+
+      tokenString := ctx.GetHeader("Authorization")
+
+      if tokenString == "" {
+
+         models.Unauthorized(ctx)
+         ctx.Abort()
+         return
+      }
+
+      tokenFiltred := strings.Split(tokenString, " ")
+
+      token, err := jwt.Parse(tokenFiltred[1], func(token *jwt.Token) (interface{}, error) {
+
+         return []byte(os.Getenv("SECRET")), nil
+      })
+
+      if err != nil || !token.Valid {
+
+         models.Unauthorized(ctx)
+
+         log.Println(err)
+         ctx.Abort()
+         return
+      }
+
+      ctx.Next()
+   }
 }

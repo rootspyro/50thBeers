@@ -32,6 +32,17 @@ func InvalidRequest( ctx *gin.Context ) {
    ctx.JSON(400, response)
 }
 
+// HTTP 401 UNAUTHORIZED 
+func Unauthorized( ctx *gin.Context ) {
+   
+   response := BasicResponse{
+      Success: false,
+      Data: "Unauthorized",
+   }
+
+   ctx.JSON(401, response)
+}
+
 // HTTP 404 NOT FOUND
 func NotFound( ctx *gin.Context ) {
    

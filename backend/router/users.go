@@ -30,7 +30,7 @@ func NewUsersRouter( g *gin.RouterGroup, uh *handlers.UsersHandler, au *auth.Aut
 
 func ( ur *UsersRouter ) Setup() {
 
-   ur.group.GET("/users", func(ctx *gin.Context) {
+   ur.group.GET("/users", ur.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
       data, err := ur.handler.GetItems()
 
@@ -70,8 +70,6 @@ func ( ur *UsersRouter ) Setup() {
          return
       }
       
-      log.Println(loginBody.Password)
-      log.Println(data.Password)
       err = bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(loginBody.Password))
 
       if err != nil {
