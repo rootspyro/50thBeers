@@ -21,7 +21,7 @@ func NewUsersTable( db *DB ) *UsersTable {
 
 func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
 
-   var(
+   var (
       userId     string
       username   string
       email      string

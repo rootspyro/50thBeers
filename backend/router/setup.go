@@ -33,17 +33,21 @@ func( sr *SetupRouter ) Setup() {
    // TABLES SETUP
 
    usersTable := db.NewUsersTable(sr.db)
+   tagsTable := db.NewTagsTable(sr.db)
 
    // HANDLERS SETUP
 
    userHandler := handlers.NewUsersHandler(usersTable);
+   tagsHandler := handlers.NewTagsHandler(tagsTable)
 
    // PATHS SETUP
    healthPath := NewHealthRouter(v1, sr.db)
    usersPath  := NewUsersRouter(v1, userHandler, authHandler)
+   tagsPath   := NewTagsRouter(v1, tagsHandler, authHandler)
 
    healthPath.Setup()
    usersPath.Setup()
+   tagsPath.Setup()
 
    // NOT FOUND
    sr.server.NoRoute(func(ctx *gin.Context) {
