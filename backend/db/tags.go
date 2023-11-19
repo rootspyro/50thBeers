@@ -93,3 +93,37 @@ func ( tt *TagsTable ) GetAllTags( params url.Values ) ([]models.Tag, int, error
 
    return data, itemsFound, nil
 }
+
+func( tt *TagsTable ) GetSingleTag( tagId int ) (models.Tag, error) {
+
+   var data models.Tag
+   var updatedAt sql.NullString
+
+   query := fmt.Sprintf(
+      `
+         Select 
+            *
+         from %s
+         where
+            id = %d
+      `,
+      tt.table,
+      tagId,
+   )
+
+   err := tt.db.Conn.QueryRow(query).Scan(
+      &data.TagId,
+      &data.TagName,
+      &data.CreatedAt,
+      &updatedAt,
+      &data.Status,
+   )
+
+   if err != nil {
+      return data, err
+   }
+
+   data.UpdatedAt = updatedAt.String
+
+   return data, nil
+}

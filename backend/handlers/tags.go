@@ -5,6 +5,7 @@ import (
 	"50thbeers/models"
 	"log"
 	"net/url"
+	"strconv"
 )
 
 
@@ -35,4 +36,13 @@ func( th *TagsHandler ) GetItems(params url.Values) (models.TagCollection, error
    }
 
    return tags, nil
+}
+
+func( th *TagsHandler ) GetItem( tagId string ) (models.Tag, error) {
+
+   tagIdInt, _ := strconv.Atoi(tagId)
+
+   data, err := th.tagsTable.GetSingleTag(tagIdInt)
+
+   return data, err
 }

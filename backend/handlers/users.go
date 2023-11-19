@@ -3,6 +3,7 @@ package handlers
 import (
 	"50thbeers/db"
 	"50thbeers/models"
+	"log"
 )
 
 type UsersHandler struct {
@@ -26,6 +27,7 @@ func( uh *UsersHandler ) GetItems() (models.UserCollection, error) {
 
    if err != nil {
       
+      log.Println(err)
       return userData, err
    }
 

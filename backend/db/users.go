@@ -2,6 +2,7 @@ package db
 
 import (
 	"50thbeers/models"
+	"database/sql"
 	"fmt"
 )
 
@@ -26,6 +27,8 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
       username   string
       email      string
       password   string
+      createdAt  string
+      updatedAt  sql.NullString
       status     string
       itemsFound int
       data       []models.User
@@ -36,12 +39,9 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
    query := fmt.Sprintf(
       `
          Select 
-            user_id,
-            username,
-            email,
-            password,
-            status 
-            from %s where status = '%s'
+            *
+         from %s 
+         where status = '%s'
       `, 
       ut.table, 
       models.UserStatuses.Avaiable,
@@ -59,6 +59,8 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
          &username,
          &email,
          &password,
+         &createdAt,
+         &updatedAt,
          &status,
       )
 
@@ -73,6 +75,8 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
          Username: username,
          Email: email,
          Password: password,
+         CreatedAt: createdAt,
+         UpdatedAt: updatedAt.String,
          Status: status,
       })
    }
