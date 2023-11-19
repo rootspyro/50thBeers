@@ -4,6 +4,7 @@ import (
 	"50thbeers/db"
 	"50thbeers/models"
 	"log"
+	"net/url"
 )
 
 
@@ -17,9 +18,9 @@ func NewTagsHandler( table *db.TagsTable ) *TagsHandler {
    }
 }
 
-func( th *TagsHandler ) GetItems() (models.TagCollection, error) {
+func( th *TagsHandler ) GetItems(params url.Values) (models.TagCollection, error) {
 
-   data, itemsFound, err := th.tagsTable.GetAllTags()
+   data, itemsFound, err := th.tagsTable.GetAllTags( params )
    
    var tags models.TagCollection
 

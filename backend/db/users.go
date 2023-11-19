@@ -33,7 +33,20 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
 
    itemsFound = 0;
    
-   rows, err := ut.db.Conn.Query("Select user_id,username,email,password,status from bo_users");
+   query := fmt.Sprintf(
+      `
+         Select 
+            user_id,
+            username,
+            email,
+            password,
+            status 
+            from %s where status = '%s'
+      `, 
+      ut.table, 
+      models.UserStatuses.Avaiable,
+   ) 
+   rows, err := ut.db.Conn.Query(query);
 
    if err != nil {
       return data, itemsFound, err 
@@ -71,7 +84,25 @@ func( ut *UsersTable ) SearchUser( user string ) ( models.User, error ) {
 
    var data models.User
 
-   query := fmt.Sprintf("Select user_id, username, email, password, status from %s where username = '%s' or email = '%s' and status = 'AVAIABLE'", ut.table, user, user)
+   query := fmt.Sprintf(
+      `
+         Select 
+            user_id, 
+            username, 
+            email, 
+            password, 
+            status 
+         from %s 
+         where 
+            username = '%s' or 
+            email = '%s' and 
+            status = '%s'`, 
+      ut.table, 
+      user, 
+      user,
+      models.UserStatuses.Avaiable,
+   )
+
    err := ut.db.Conn.QueryRow(query).Scan(
       &data.UserID,
       &data.Username,

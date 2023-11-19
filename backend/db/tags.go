@@ -4,22 +4,34 @@ import (
 	"50thbeers/models"
 	"database/sql"
 	"fmt"
+	"net/url"
 	"strconv"
 )
 
 type TagsTable struct {
-   db    *DB
-   table string
+   db      *DB
+   table   string
+   filters []models.Filter
 }
 
 func NewTagsTable( db *DB ) *TagsTable {
    return &TagsTable{
       db: db,
       table: "tags",
+      filters: []models.Filter{
+         {
+            Name: "tagname",
+            Type: models.FilterTypes.Like,
+         },
+         {
+            Name: "status",
+            Type: models.FilterTypes.EqualString,
+         },
+      },
    }
 }
 
-func ( tt *TagsTable ) GetAllTags() ([]models.Tag, int, error) {
+func ( tt *TagsTable ) GetAllTags( params url.Values ) ([]models.Tag, int, error) {
 
    var (
       tagId     string
@@ -32,7 +44,19 @@ func ( tt *TagsTable ) GetAllTags() ([]models.Tag, int, error) {
 
    itemsFound := 0
 
-   query := fmt.Sprintf("Select * from %s where status = 'PUBLIC' order by tagname", tt.table)
+   filters := tt.db.BuildWhere(params, tt.filters)
+
+   query := fmt.Sprintf(
+      `
+         Select  
+            *
+         from %s 
+         %s
+         order by tagname
+      `, 
+      tt.table,
+      filters,
+   )
    rows, err := tt.db.Conn.Query(query)
 
    if err != nil {

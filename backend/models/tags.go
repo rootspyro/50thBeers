@@ -12,3 +12,4 @@ type TagCollection struct {
    ItemsFound int   `json:"itemsFound"`
    Items      []Tag `json:"items"`
 }
+

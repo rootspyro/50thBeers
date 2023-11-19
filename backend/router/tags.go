@@ -26,7 +26,9 @@ func( tr *TagRouter ) Setup() {
 
    tr.group.GET("/tags", func(ctx *gin.Context) {
 
-      data, err := tr.handler.GetItems()
+      params := ctx.Request.URL.Query()
+
+      data, err := tr.handler.GetItems(params)
 
       if err != nil {
          models.ServerError(ctx)
