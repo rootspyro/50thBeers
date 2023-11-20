@@ -10,7 +10,6 @@ type BasicResponse struct {
 }
 
 // HTTP 200 OK
-
 func OK( ctx *gin.Context, data any ) {
 
    response := BasicResponse {
@@ -19,6 +18,17 @@ func OK( ctx *gin.Context, data any ) {
    }
 
    ctx.JSON(200, response) 
+}
+
+// HTTP 201 CREATED 
+func Created( ctx *gin.Context, data any ) {
+
+   response := BasicResponse {
+      Success: true,
+      Data: data,
+   }
+
+   ctx.JSON(201, response) 
 }
 
 // HTTP 400 INVALID REQUEST 

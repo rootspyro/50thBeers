@@ -1,10 +1,13 @@
 package db
 
 import (
-    _ "github.com/lib/pq"
+	"50thbeers/models"
 	"database/sql"
 	"fmt"
 	"log"
+	"net/url"
+
+	_ "github.com/lib/pq"
 )
 
 
@@ -44,4 +47,45 @@ func NewDBConnection(host, username, password, dbname, port string) *DB {
       port: port,
       Conn: conn,
    }
+}
+
+func ( db *DB ) BuildWhere( params url.Values, filters []models.Filter ) string {
+
+   whereScript := ""
+   counter := 0
+
+   for index := range params {
+
+      for _, filter := range filters {
+
+         if index == filter.Name {
+
+            if counter > 0 {
+               whereScript += " and"
+            }
+
+            switch filter.Type {
+
+            case models.FilterTypes.Like:
+               whereScript += fmt.Sprintf(" %s like '%%%s%%'", filter.Name, params.Get(index))
+               break
+            
+            case models.FilterTypes.EqualString:
+               whereScript += fmt.Sprintf(" %s = '%s'", filter.Name, params.Get(index))
+               break
+            }
+
+
+         }
+      }
+
+      counter++
+
+   }
+
+   if len(params) > 0 {
+      whereScript = "Where " + whereScript
+   }
+
+   return whereScript
 }

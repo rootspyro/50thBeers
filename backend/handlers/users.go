@@ -3,21 +3,22 @@ package handlers
 import (
 	"50thbeers/db"
 	"50thbeers/models"
+	"log"
 )
 
 type UsersHandler struct {
    usersTable *db.UsersTable
 }
 
-func NewUsersHandler( ut *db.UsersTable ) *UsersHandler {
+func NewUsersHandler( table *db.UsersTable ) *UsersHandler {
    return &UsersHandler{
-      usersTable: ut,
+      usersTable: table,
    }
 }
 
 func( uh *UsersHandler ) GetItems() (models.UserCollection, error) {
 
-   data, itemsFound, err := uh.usersTable.GetAllUsers();
+   data, itemsFound, err := uh.usersTable.GetAllUsers()
 
    userData := models.UserCollection{
       ItemsFound: 0,
@@ -26,6 +27,7 @@ func( uh *UsersHandler ) GetItems() (models.UserCollection, error) {
 
    if err != nil {
       
+      log.Println(err)
       return userData, err
    }
 

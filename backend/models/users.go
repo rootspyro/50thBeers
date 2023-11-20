@@ -1,11 +1,13 @@
 package models
 
 type User struct {
-   UserID   string `json:"id"`
-   Username string `json:"username"`
-   Email    string `json:"email"`
-   Password string `json:"password"`
-   Status   string `json:"status"`
+   UserID    string `json:"id"`
+   Username  string `json:"username"`
+   Email     string `json:"email"`
+   Password  string `json:"password"`
+   CreatedAt string `json:"createdAt"`
+   UpdatedAt string `json:"updatedAt"`
+   Status    string `json:"status"`
 }
 
 type UserCollection struct {

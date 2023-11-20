@@ -2,6 +2,7 @@ package db
 
 import (
 	"50thbeers/models"
+	"database/sql"
 	"fmt"
 )
 
@@ -21,11 +22,13 @@ func NewUsersTable( db *DB ) *UsersTable {
 
 func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
 
-   var(
+   var (
       userId     string
       username   string
       email      string
       password   string
+      createdAt  string
+      updatedAt  sql.NullString
       status     string
       itemsFound int
       data       []models.User
@@ -33,7 +36,17 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
 
    itemsFound = 0;
    
-   rows, err := ut.db.Conn.Query("Select user_id,username,email,password,status from bo_users");
+   query := fmt.Sprintf(
+      `
+         Select 
+            *
+         from %s 
+         where status = '%s'
+      `, 
+      ut.table, 
+      models.UserStatuses.Avaiable,
+   ) 
+   rows, err := ut.db.Conn.Query(query);
 
    if err != nil {
       return data, itemsFound, err 
@@ -46,6 +59,8 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
          &username,
          &email,
          &password,
+         &createdAt,
+         &updatedAt,
          &status,
       )
 
@@ -60,6 +75,8 @@ func( ut *UsersTable ) GetAllUsers() ([]models.User, int, error) {
          Username: username,
          Email: email,
          Password: password,
+         CreatedAt: createdAt,
+         UpdatedAt: updatedAt.String,
          Status: status,
       })
    }
@@ -71,7 +88,25 @@ func( ut *UsersTable ) SearchUser( user string ) ( models.User, error ) {
 
    var data models.User
 
-   query := fmt.Sprintf("Select user_id, username, email, password, status from %s where username = '%s' or email = '%s' and status = 'AVAIABLE'", ut.table, user, user)
+   query := fmt.Sprintf(
+      `
+         Select 
+            user_id, 
+            username, 
+            email, 
+            password, 
+            status 
+         from %s 
+         where 
+            username = '%s' or 
+            email = '%s' and 
+            status = '%s'`, 
+      ut.table, 
+      user, 
+      user,
+      models.UserStatuses.Avaiable,
+   )
+
    err := ut.db.Conn.QueryRow(query).Scan(
       &data.UserID,
       &data.Username,
