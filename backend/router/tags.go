@@ -62,5 +62,45 @@ func( tr *TagRouter ) Setup() {
       models.OK(ctx, data)
 
    })
+
+   tr.group.POST("/tags", func(ctx *gin.Context) {
+
+      var body models.NewTagBody
+
+      if err := ctx.ShouldBindJSON(&body); err != nil {
+         models.InvalidRequest(ctx)
+         return
+      }
+
+      // Validate if the tag already exist
+      _, err := tr.handler.SearchItemByName(body.TagName)
+
+      if err != nil {
+
+         if err == sql.ErrNoRows {
+            // if the tag doesn't exists then creates the tag
+
+            data, err := tr.handler.CreateItem(body)
+
+            if err != nil {
+
+               log.Println(err)
+               models.ServerError(ctx)
+               return
+            }
+
+            models.Created(ctx, data)
+            return
+         }
+
+         // server error
+         log.Println(err)
+         models.ServerError(ctx)
+         return
+      } 
+
+      // if the tag exists send 409 CONFLICT
+      models.Conflict(ctx) 
+   })
 }
 

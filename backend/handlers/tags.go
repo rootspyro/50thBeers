@@ -46,3 +46,13 @@ func( th *TagsHandler ) GetItem( tagId string ) (models.Tag, error) {
 
    return data, err
 }
+
+func( th *TagsHandler ) SearchItemByName( name string ) ( models.Tag, error ) {
+
+   return th.tagsTable.SearchTagByName(name)
+}
+
+func( th *TagsHandler ) CreateItem( data models.NewTagBody ) (models.Tag, error) {
+
+   return th.tagsTable.CreateTag(data) 
+}

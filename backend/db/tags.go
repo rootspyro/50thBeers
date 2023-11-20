@@ -127,3 +127,67 @@ func( tt *TagsTable ) GetSingleTag( tagId int ) (models.Tag, error) {
 
    return data, nil
 }
+
+func( tt *TagsTable ) SearchTagByName(name string) (models.Tag, error) {
+
+   var tag models.Tag
+   var updatedAt sql.NullString
+
+   query := fmt.Sprintf(
+      `
+         Select
+            *
+         from %s
+         Where
+            tagname = '%s'
+      `,
+      tt.table,
+      name,
+   )
+
+   err := tt.db.Conn.QueryRow(query).Scan(
+      &tag.TagId,
+      &tag.TagName,
+      &tag.CreatedAt,
+      &updatedAt,
+      &tag.Status,
+   )
+
+   return tag, err
+
+}
+
+func( tt *TagsTable ) CreateTag( data models.NewTagBody ) (models.Tag, error) {
+
+   var response models.Tag
+
+   query := fmt.Sprintf(
+      `
+         Insert into %s
+         (
+            tagname
+         )
+         Values
+         (
+            '%s'
+         )
+         Returning id
+      `,
+      tt.table,
+      data.TagName,
+   )
+
+   var tagId string
+
+   err := tt.db.Conn.QueryRow(query).Scan(&tagId)
+
+   if err != nil {
+      return response, err
+   }
+
+   tagIdInt, _ := strconv.Atoi(tagId)
+
+   response, err = tt.GetSingleTag(tagIdInt) 
+
+   return response, err 
+}
