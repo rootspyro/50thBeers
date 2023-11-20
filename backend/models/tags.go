@@ -13,6 +13,6 @@ type TagCollection struct {
    Items      []Tag `json:"items"`
 }
 
-type NewTagBody struct {
+type TagBody struct {
    TagName string  `json:"tagname"`
 }

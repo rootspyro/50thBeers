@@ -52,7 +52,14 @@ func( th *TagsHandler ) SearchItemByName( name string ) ( models.Tag, error ) {
    return th.tagsTable.SearchTagByName(name)
 }
 
-func( th *TagsHandler ) CreateItem( data models.NewTagBody ) (models.Tag, error) {
+func( th *TagsHandler ) CreateItem( data models.TagBody ) (models.Tag, error) {
 
    return th.tagsTable.CreateTag(data) 
+}
+
+func( th *TagsHandler ) UpdateItem( data models.TagBody, tagId string ) ( models.Tag, error ) {
+
+   tagIdInt, _ := strconv.Atoi(tagId)
+
+   return th.tagsTable.UpdateTag(data, tagIdInt)
 }

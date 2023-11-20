@@ -63,9 +63,9 @@ func( tr *TagRouter ) Setup() {
 
    })
 
-   tr.group.POST("/tags", func(ctx *gin.Context) {
+   tr.group.POST("/tags", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
-      var body models.NewTagBody
+      var body models.TagBody
 
       if err := ctx.ShouldBindJSON(&body); err != nil {
          models.InvalidRequest(ctx)
@@ -101,6 +101,67 @@ func( tr *TagRouter ) Setup() {
 
       // if the tag exists send 409 CONFLICT
       models.Conflict(ctx) 
+   })
+
+   tr.group.PATCH("/tags/:id", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
+
+      // We get the request body and path Id
+      var (
+         tagId string
+         body  models.TagBody
+      ) 
+
+      tagId = ctx.Param("id")
+
+      err := ctx.ShouldBindJSON(&body)
+
+      if err != nil {
+
+         log.Println(err)
+         models.InvalidRequest(ctx)
+         return
+      }
+
+      // tag validation searching
+      tag, err := tr.handler.GetItem(tagId)
+
+      if err != nil {
+
+         if err == sql.ErrNoRows {
+            models.NotFound(ctx)
+            return
+         }
+
+         log.Println(tag)
+         models.ServerError(ctx)
+         return
+      }
+
+      // if tag exists then validate that the new tagname is unique
+      _, err = tr.handler.SearchItemByName(body.TagName)
+
+      if err != nil {
+
+         if err == sql.ErrNoRows {
+
+            // the updates the tag
+            newTag, err := tr.handler.UpdateItem(body, tagId)
+
+            if err != nil {
+               log.Println(err)
+               models.ServerError(ctx)
+               return
+            }
+
+            models.OK(ctx, newTag)
+            return
+         }
+
+         log.Println(err)
+         models.ServerError(ctx)
+      }
+
+      models.Conflict(ctx)
    })
 }
 

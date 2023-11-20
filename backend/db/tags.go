@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 type TagsTable struct {
@@ -157,7 +158,7 @@ func( tt *TagsTable ) SearchTagByName(name string) (models.Tag, error) {
 
 }
 
-func( tt *TagsTable ) CreateTag( data models.NewTagBody ) (models.Tag, error) {
+func( tt *TagsTable ) CreateTag( data models.TagBody ) (models.Tag, error) {
 
    var response models.Tag
 
@@ -191,3 +192,39 @@ func( tt *TagsTable ) CreateTag( data models.NewTagBody ) (models.Tag, error) {
 
    return response, err 
 }
+
+func( tt *TagsTable ) UpdateTag( data models.TagBody, tagId int ) (models.Tag, error){
+
+   var (
+      tag models.Tag
+   )
+
+   timestamp := time.Now()
+   formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
+
+   query := fmt.Sprintf(
+      `
+         Update
+            %s
+         Set
+            tagname = '%s',
+            updated_at = '%s'
+         Where
+            id = %d
+      `,
+      tt.table,
+      data.TagName,
+      formattedTimestamp,
+      tagId,
+   )
+
+   _, err := tt.db.Conn.Exec(query)
+
+   if err != nil {
+      return tag, err 
+   }
+   
+   tag, err = tt.GetSingleTag(tagId)
+   
+   return tag, err 
+} 
