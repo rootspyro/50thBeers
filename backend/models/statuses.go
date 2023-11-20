@@ -25,11 +25,9 @@ var UserStatuses = USER_STATUSES {
 var TagsStatuses = TAGS_STATUSES {
    Public:  "PUBLIC",
    Created: "CREATED",
-   Deleted: "DELETED",
 }
 
 var CountriesStatuses = COUNTRIES_STATUSES {
    Public:  "PUBLIC",
    Created: "CREATED",
-   Deleted: "DELETED",
 }

@@ -45,7 +45,11 @@ func ( tt *TagsTable ) GetAllTags( params url.Values ) ([]models.Tag, int, error
 
    itemsFound := 0
 
-   filters := tt.db.BuildWhere(params, tt.filters)
+   whereScript := tt.db.BuildWhere(params, tt.filters)
+
+   if whereScript == "" {
+      whereScript = fmt.Sprintf("where status = '%s'", models.TagsStatuses.Public)
+   }
 
    query := fmt.Sprintf(
       `
@@ -56,7 +60,7 @@ func ( tt *TagsTable ) GetAllTags( params url.Values ) ([]models.Tag, int, error
          order by tagname
       `, 
       tt.table,
-      filters,
+      whereScript,
    )
    rows, err := tt.db.Conn.Query(query)
 
@@ -228,3 +232,26 @@ func( tt *TagsTable ) UpdateTag( data models.TagBody, tagId int ) (models.Tag, e
    
    return tag, err 
 } 
+
+func(tt *TagsTable) DeleteTag(tagId int) ( bool, error ) {
+
+   query := fmt.Sprintf(
+      `
+         Delete from
+            %s
+         Where
+            id = '%d'
+      `,
+      tt.table,
+      tagId,
+   )
+
+   _, err := tt.db.Conn.Exec(query)
+
+   if err != nil {
+
+      return false, err
+   }
+
+   return true, nil
+}

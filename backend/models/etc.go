@@ -17,6 +17,6 @@ var FilterTypes = FILTER_TYPES {
 }
 
 type Filter struct {
-   Name string 
-   Type string
+   Name    string 
+   Type    string
 }

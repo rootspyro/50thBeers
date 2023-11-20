@@ -163,5 +163,31 @@ func( tr *TagRouter ) Setup() {
 
       models.Conflict(ctx)
    })
+
+   tr.group.DELETE("/tags/:id", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
+
+      tagId := ctx.Param("id")
+      _, err := tr.handler.GetItem(tagId)
+
+      if err != nil {
+         if err == sql.ErrNoRows {
+            models.NotFound(ctx)
+            return
+         }
+
+         log.Println(err)
+         models.ServerError(ctx)
+         return
+      }
+
+      success := tr.handler.DeleteItem(tagId)
+
+      if !success {
+         models.ServerError(ctx)
+         return
+      }
+
+      models.OK(ctx, "item deleted!")
+   })
 }
 

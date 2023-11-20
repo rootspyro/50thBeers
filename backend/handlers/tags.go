@@ -63,3 +63,16 @@ func( th *TagsHandler ) UpdateItem( data models.TagBody, tagId string ) ( models
 
    return th.tagsTable.UpdateTag(data, tagIdInt)
 }
+
+func( th *TagsHandler ) DeleteItem( tagId string ) bool {
+
+   tagIdInt, _ := strconv.Atoi(tagId)
+
+   success, err := th.tagsTable.DeleteTag(tagIdInt)
+
+   if err != nil {
+      log.Println(err)
+   }
+
+   return success
+}
