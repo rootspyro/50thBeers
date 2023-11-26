@@ -82,8 +82,8 @@ func ( db *DB ) BuildWhere( params url.Values, filters []models.Filter ) string 
       counter++
 
    }
-
-   if len(params) > 0 {
+   
+   if whereScript != "" {
       whereScript = "Where " + whereScript
    }
 

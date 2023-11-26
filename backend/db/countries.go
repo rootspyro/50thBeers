@@ -8,30 +8,30 @@ import (
 	"time"
 )
 
-type CountryTable struct {
+type CountriesTable struct {
    db      *DB
    table   string
    filters []models.Filter
 }
 
-func NewCountryTable( db *DB ) *CountryTable {
-   return &CountryTable{
+func NewCountriesTable( db *DB ) *CountriesTable {
+   return &CountriesTable{
       db: db,
       table: "countries",
       filters: []models.Filter{
          {
-            Name: "country",
+            Name: "country_name",
             Type: models.FilterTypes.Like,
          },
          {
             Name: "status",
-            Type: models.FilterTypes.EqualNumber,
+            Type: models.FilterTypes.EqualString,
          },
       },
    }
 }
 
-func (ct *CountryTable) GetAllCountries( params url.Values ) ( []models.Country, int, error ) {
+func (ct *CountriesTable) GetAllCountries( params url.Values ) ( []models.Country, int, error ) {
 
    var (
       country     models.Country
@@ -90,7 +90,7 @@ func (ct *CountryTable) GetAllCountries( params url.Values ) ( []models.Country,
    return countries, itemsFound, err
 }
 
-func( ct *CountryTable ) GetSingleCountry(countryId int) (models.Country, error) {
+func( ct *CountriesTable ) GetSingleCountry(countryId int) (models.Country, error) {
 
    var (
       data models.Country
@@ -103,9 +103,10 @@ func( ct *CountryTable ) GetSingleCountry(countryId int) (models.Country, error)
             *
          from %s
          Where
-            id = '%s'
+            id = %d and status = '%s'
       `,
       ct.table,
+      countryId,
       models.CountriesStatuses.Default,
    )
 
@@ -123,7 +124,7 @@ func( ct *CountryTable ) GetSingleCountry(countryId int) (models.Country, error)
 
 }
 
-func( ct *CountryTable ) SearchCountryByName(name string) (models.Country, error) {
+func( ct *CountriesTable ) SearchCountryByName(name string) (models.Country, error) {
 
    var (
       country   models.Country
@@ -155,7 +156,7 @@ func( ct *CountryTable ) SearchCountryByName(name string) (models.Country, error
    return country, err
 }
 
-func( ct *CountryTable ) CreateCountry(body models.CountryBody) ( models.Country, error ) {
+func( ct *CountriesTable ) CreateCountry(body models.CountryBody) ( models.Country, error ) {
 
    var(
       country   models.Country
@@ -188,7 +189,7 @@ func( ct *CountryTable ) CreateCountry(body models.CountryBody) ( models.Country
    return ct.GetSingleCountry(countryId)
 }
 
-func( ct *CountryTable ) UpdateCountry(body models.CountryBody, countryId int) ( models.Country, error ) {
+func( ct *CountriesTable ) UpdateCountry(body models.CountryBody, countryId int) ( models.Country, error ) {
 
    var (
       country models.Country
@@ -224,13 +225,13 @@ func( ct *CountryTable ) UpdateCountry(body models.CountryBody, countryId int) (
    return country, err
 }
 
-func( ct *CountryTable ) DeleteCountry(countryId int) ( bool, error ) {
+func( ct *CountriesTable ) DeleteCountry(countryId int) ( bool, error ) {
 
    query := fmt.Sprintf(
       `
          Delete from %s
          Where
-            id = '%s'
+            id = '%d'
       `,
       ct.table,
       countryId,

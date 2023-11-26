@@ -14,5 +14,5 @@ type CountryCollection struct {
 }
 
 type CountryBody struct {
-   CountryName string `json:"countryName"`
+   CountryName string `json:"countryName" binding:"required"`
 }
