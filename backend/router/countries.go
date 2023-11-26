@@ -33,7 +33,7 @@ func NewCountriesRouter(
 
 func( cr *CountriesRouter ) Setup() {
 
-   cr.group.GET("/countries", func(ctx *gin.Context) {
+   cr.group.GET("/countries", cr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
       
       params := ctx.Request.URL.Query()
 
@@ -47,7 +47,7 @@ func( cr *CountriesRouter ) Setup() {
       models.OK(ctx, data)
    })
 
-   cr.group.GET("/countries/:id", func(ctx *gin.Context) {
+   cr.group.GET("/countries/:id", cr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
       countryId := ctx.Param("id")
 

@@ -33,7 +33,7 @@ func NewTagsRouter(
 
 func( tr *TagRouter ) Setup() {
 
-   tr.group.GET("/tags", func(ctx *gin.Context) {
+   tr.group.GET("/tags", tr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
       params := ctx.Request.URL.Query()
 
@@ -47,7 +47,7 @@ func( tr *TagRouter ) Setup() {
       models.OK(ctx, data)
    })
 
-   tr.group.GET("/tags/:id", func(ctx *gin.Context) {
+   tr.group.GET("/tags/:id", tr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
       tagId := ctx.Param("id")
 

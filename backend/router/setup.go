@@ -28,7 +28,10 @@ func( sr *SetupRouter ) Setup() {
 
    // AUTH SETUP
 
-   authHandler := auth.NewAuthHandler(os.Getenv("SECRET"))
+   authHandler := auth.NewAuthHandler(
+      os.Getenv("SECRET"),
+      os.Getenv("API_KEY"),
+   )
 
    // TABLES SETUP
 

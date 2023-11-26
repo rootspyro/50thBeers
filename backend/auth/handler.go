@@ -13,11 +13,13 @@ import (
 
 type AuthHandler struct {
    secret []byte
+   apiKey string
 }
 
-func NewAuthHandler( s string ) *AuthHandler {
+func NewAuthHandler( s, a string) *AuthHandler {
    return &AuthHandler{
       secret: []byte(s),
+      apiKey: a,
    }
 }
 
@@ -68,4 +70,30 @@ func( ah *AuthHandler ) AuthMiddleware() gin.HandlerFunc {
 
       ctx.Next()
    }
+}
+
+func(ah *AuthHandler) APIKeyMiddleware() gin.HandlerFunc {
+   return func(ctx *gin.Context) {
+
+      apikeyString := ctx.GetHeader("api_key")
+
+      if apikeyString == "" {
+
+         models.Unauthorized(ctx)
+         ctx.Abort()
+         return
+      }
+
+      if !ah.APIKeyIsValid(apikeyString) {
+
+         models.Unauthorized(ctx)
+         return
+      }
+
+      ctx.Next()
+   }
+}
+
+func(ah *AuthHandler) APIKeyIsValid(apiKey string) bool {
+   return apiKey == ah.apiKey
 }

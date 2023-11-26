@@ -44,7 +44,7 @@ func ( ur *UsersRouter ) Setup() {
 
    })
 
-   ur.group.POST("/auth/login", func(ctx *gin.Context) {
+   ur.group.POST("/auth/login", ur.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
       var loginBody models.LoginBody
 
