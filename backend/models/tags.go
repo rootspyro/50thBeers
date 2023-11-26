@@ -1,8 +1,8 @@
 package models
 
 type Tag struct {
-   TagId int        `json:"id"`
-   TagName string   `json:"tagname"`
+   TagId     int    `json:"id"`
+   TagName   string `json:"tagname"`
    CreatedAt string `json:"createdAt"` 
    UpdatedAt string `json:"updatedAt"`
    Status    string `json:"status"`
@@ -14,5 +14,5 @@ type TagCollection struct {
 }
 
 type TagBody struct {
-   TagName string  `json:"tagname"`
+   TagName string  `json:"tagname" binding:"required"`
 }

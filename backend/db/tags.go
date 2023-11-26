@@ -48,7 +48,7 @@ func ( tt *TagsTable ) GetAllTags( params url.Values ) ([]models.Tag, int, error
    whereScript := tt.db.BuildWhere(params, tt.filters)
 
    if whereScript == "" {
-      whereScript = fmt.Sprintf("where status = '%s'", models.TagsStatuses.Public)
+      whereScript = fmt.Sprintf("where status = '%s'", models.TagsStatuses.Default)
    }
 
    query := fmt.Sprintf(
@@ -124,13 +124,9 @@ func( tt *TagsTable ) GetSingleTag( tagId int ) (models.Tag, error) {
       &data.Status,
    )
 
-   if err != nil {
-      return data, err
-   }
-
    data.UpdatedAt = updatedAt.String
 
-   return data, nil
+   return data, err 
 }
 
 func( tt *TagsTable ) SearchTagByName(name string) (models.Tag, error) {
@@ -158,8 +154,9 @@ func( tt *TagsTable ) SearchTagByName(name string) (models.Tag, error) {
       &tag.Status,
    )
 
-   return tag, err
+   tag.UpdatedAt = updatedAt.String
 
+   return tag, err
 }
 
 func( tt *TagsTable ) CreateTag( data models.TagBody ) (models.Tag, error) {

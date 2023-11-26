@@ -10,87 +10,86 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type TagRouter struct {
+type CountriesRouter struct {
    group   *gin.RouterGroup
-   handler *handlers.TagsHandler
+   handler *handlers.CountriesHandler
    auth    *auth.AuthHandler
 }
 
-func NewTagsRouter( 
+func NewCountriesRouter( 
 
    g *gin.RouterGroup, 
-   th *handlers.TagsHandler, 
+   ch *handlers.CountriesHandler, 
    au *auth.AuthHandler,
 
-) *TagRouter {
+) *CountriesRouter {
 
-   return &TagRouter{
+   return &CountriesRouter{
       group: g,
-      handler: th,
+      handler: ch,
       auth: au,
    }
 }
 
-func( tr *TagRouter ) Setup() {
+func( cr *CountriesRouter ) Setup() {
 
-   tr.group.GET("/tags", func(ctx *gin.Context) {
-
+   cr.group.GET("/countries", func(ctx *gin.Context) {
+      
       params := ctx.Request.URL.Query()
 
-      data, err := tr.handler.GetItems(params)
+      data, err :=  cr.handler.GetItems(params)
 
       if err != nil {
          models.ServerError(ctx)
          return
       }
-      
+
       models.OK(ctx, data)
    })
 
-   tr.group.GET("/tags/:id", func(ctx *gin.Context) {
+   cr.group.GET("/countries/:id", func(ctx *gin.Context) {
 
-      tagId := ctx.Param("id")
+      countryId := ctx.Param("id")
 
-      data, err := tr.handler.GetItem(tagId)
+      data, err := cr.handler.GetItem(countryId)
 
       if err != nil {
-
+         
          if err == sql.ErrNoRows {
+
             models.NotFound(ctx)
             return
          }
 
          log.Println(err)
-
          models.ServerError(ctx)
          return
       }
 
       models.OK(ctx, data)
-
    })
 
-   tr.group.POST("/tags", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
+   cr.group.POST("/countries", cr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
-      var body models.TagBody
+      var body models.CountryBody
 
       if err := ctx.ShouldBindJSON(&body); err != nil {
          models.InvalidRequest(ctx)
          return
       }
 
-      // Validate if the tag already exist
-      _, err := tr.handler.SearchItemByName(body.TagName)
+      // Validate if country already exits
+      _, err := cr.handler.SearchItemByName(body.CountryName)
 
       if err != nil {
-
+         
+         // if the country doesn't exists then creates it
          if err == sql.ErrNoRows {
-            // if the tag doesn't exists then creates the tag
 
-            data, err := tr.handler.CreateItem(body)
+            data, err := cr.handler.CreateItem(body)
 
             if err != nil {
-
+               
                log.Println(err)
                models.ServerError(ctx)
                return
@@ -100,59 +99,57 @@ func( tr *TagRouter ) Setup() {
             return
          }
 
-         // server error
+         // ServerError
          log.Println(err)
          models.ServerError(ctx)
          return
-      } 
+      }
 
-      // if the tag exists send 409 CONFLICT
-      models.Conflict(ctx) 
+      models.Conflict(ctx)
    })
 
-   tr.group.PATCH("/tags/:id", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
+   cr.group.PATCH("/countries/:id", cr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
-      // We get the request body and path Id
       var (
-         tagId string
-         body  models.TagBody
-      ) 
+         countryId string
+         body      models.CountryBody
+      )
 
-      tagId = ctx.Param("id")
-
-      err := ctx.ShouldBindJSON(&body)
-
-      if err != nil {
+      countryId = ctx.Param("id")
+      
+      if err := ctx.ShouldBindJSON(&body); err != nil {
 
          log.Println(err)
          models.InvalidRequest(ctx)
          return
       }
 
-      // tag validation searching
-      tag, err := tr.handler.GetItem(tagId)
+      // country validation searching
 
+      _, err := cr.handler.GetItem(countryId)
+      
       if err != nil {
 
          if err == sql.ErrNoRows {
+
             models.NotFound(ctx)
             return
          }
 
-         log.Println(tag)
+         log.Println(err)
          models.ServerError(ctx)
          return
       }
 
-      // if tag exists then validate that the new tagname is unique
-      _, err = tr.handler.SearchItemByName(body.TagName)
+      // if country exist then validate that the new countryName is unique
+      _, err = cr.handler.SearchItemByName(body.CountryName)
 
       if err != nil {
 
          if err == sql.ErrNoRows {
 
-            // the updates the tag
-            newTag, err := tr.handler.UpdateItem(body, tagId)
+            // Updates the country
+            newCountry, err := cr.handler.UpdateItem(countryId, body)
 
             if err != nil {
                log.Println(err)
@@ -160,24 +157,28 @@ func( tr *TagRouter ) Setup() {
                return
             }
 
-            models.OK(ctx, newTag)
+            models.OK(ctx, newCountry)
             return
          }
 
          log.Println(err)
          models.ServerError(ctx)
+         return
       }
-
+      
       models.Conflict(ctx)
+      return
    })
 
-   tr.group.DELETE("/tags/:id", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
+   cr.group.DELETE("/countries/:id", cr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
-      tagId := ctx.Param("id")
-      _, err := tr.handler.GetItem(tagId)
+      countryId := ctx.Param("id")
+      _, err := cr.handler.GetItem(countryId)
 
       if err != nil {
+         
          if err == sql.ErrNoRows {
+
             models.NotFound(ctx)
             return
          }
@@ -187,7 +188,7 @@ func( tr *TagRouter ) Setup() {
          return
       }
 
-      success := tr.handler.DeleteItem(tagId)
+      success := cr.handler.DeleteItem(countryId)
 
       if !success {
          models.ServerError(ctx)
@@ -197,4 +198,3 @@ func( tr *TagRouter ) Setup() {
       models.OK(ctx, "item deleted!")
    })
 }
-
