@@ -26,6 +26,26 @@ func NewLocationsTable( db *DB ) *LocationsTable {
             Name: "status",
             Type: models.FilterTypes.EqualString,
          },
+         {
+            Name: "limit",
+            Type: models.FilterTypes.Limit,
+            DefaultVal: "10",
+         },
+         {
+           Name: "offset",
+           Type: models.FilterTypes.Offset,
+           DefaultVal: "0",
+         },
+         {
+           Name: "orderBy",
+           Type: models.FilterTypes.OrderBy,
+           DefaultVal: "id",
+         }, 
+         {
+           Name: "direction",
+           Type: models.FilterTypes.Direction,
+           DefaultVal: "ASC",
+         },
       },
    }
 }
@@ -43,6 +63,7 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
    itemsFound := 0
 
    whereScript := lt.db.BuildWhere( params, lt.filters )
+   pagScript   := lt.db.BuildPagination(params, lt.filters)
 
    query := fmt.Sprintf(
       `
@@ -51,9 +72,11 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
          From
             %s
          %s
+         %s
       `,
       lt.table,
       whereScript,
+      pagScript,
    )
 
    rows, err := lt.db.Conn.Query(query)
