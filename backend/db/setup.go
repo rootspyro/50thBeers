@@ -67,7 +67,7 @@ func ( db *DB ) BuildWhere( params url.Values, filters []models.Filter ) string 
         switch filter.Type {
 
           case models.FilterTypes.Like:
-             whereScript += fmt.Sprintf(" %s like '%%%s%%'", filter.Name, params.Get(index))
+             whereScript += fmt.Sprintf(" %s Ilike '%%%s%%'", filter.Name, params.Get(index))
              counter++
              break
           

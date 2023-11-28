@@ -65,7 +65,31 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
    whereScript := lt.db.BuildWhere( params, lt.filters )
    pagScript   := lt.db.BuildPagination(params, lt.filters)
 
-   query := fmt.Sprintf(
+   // GET COUNT
+
+   countQuery := fmt.Sprintf(
+    `
+      Select
+        count(id)
+      From
+        %s
+      %s
+    `,
+    lt.table,
+    whereScript,
+  )
+
+  fmt.Println(countQuery)
+
+  err := lt.db.Conn.QueryRow(countQuery).Scan(&itemsFound)
+  
+  if err != nil {
+    return locations, 0, err
+  }
+
+  // GET FILTERED DATA
+   
+  query := fmt.Sprintf(
       `
          Select
             *
@@ -86,8 +110,6 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
    }
 
    for rows.Next() {
-
-      itemsFound++
 
       err := rows.Scan(
          &location.LocationId,
