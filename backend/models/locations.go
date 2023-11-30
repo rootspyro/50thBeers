@@ -17,7 +17,8 @@ type LocationsCollection struct {
 }
 
 type LocationBody struct {
-   LocationName string `json:"locationName"`
-   MapsLink     string `json:"mapsLink"`
-   Comments     string `json:"comments"`
+  LocationName string `json:"locationName"`
+  MapsLink     string `json:"mapsLink"`
+  Comments     string `json:"comments"`
 }
+

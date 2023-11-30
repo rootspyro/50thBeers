@@ -33,3 +33,19 @@ func( lh *LocationsHandler ) GetItems( params url.Values ) ( models.LocationsCol
 
    return locations, nil
 }
+
+func( lh *LocationsHandler ) GetItem( locationId string ) ( models.Location, error ) {
+
+  return lh.locationsTable.GetSingleLocation(locationId)
+
+} 
+
+func( lh *LocationsHandler ) CreateItem( body models.LocationBody ) ( models.Location, error ) {
+
+  return lh.locationsTable.CreateLocation(body)
+}
+
+func( lh *LocationsHandler) UpdateItem( body models.LocationBody, locationId string ) ( models.Location, error ) {
+
+  return lh.locationsTable.UpdateLocation(body, locationId)
+}

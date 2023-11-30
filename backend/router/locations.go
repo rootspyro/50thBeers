@@ -4,6 +4,9 @@ import (
 	"50thbeers/auth"
 	"50thbeers/handlers"
 	"50thbeers/models"
+	"database/sql"
+	"log"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -42,4 +45,111 @@ func( lr *LocationsRouter ) Setup() {
 
       models.OK(ctx, data)
    })
+
+   lr.group.GET("/locations/:id", func(ctx *gin.Context) {
+
+    locationId := ctx.Param("id")
+
+    data, err := lr.handler.GetItem(locationId)
+
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+        models.NotFound(ctx)
+        return 
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, data)
+
+   })
+
+   lr.group.POST("/locations", func(ctx *gin.Context) {
+
+    var body models.LocationBody
+
+    if err := ctx.ShouldBindJSON(&body); err != nil {
+
+      models.InvalidRequest(ctx)
+      return
+    } 
+
+    // we convert the name to the id
+    newId := strings.ToLower(body.LocationName)
+    newId = strings.ReplaceAll(newId, " ", "_")
+
+    // search if the item already exist
+    _, err := lr.handler.GetItem(newId)
+
+    if err != nil {
+
+      // if location doesn't exist then create it
+      if err == sql.ErrNoRows {
+
+        location, err := lr.handler.CreateItem(body)
+        
+        if err != nil {
+
+          log.Println(err)
+          models.ServerError(ctx)
+          return
+        }
+
+        models.Created(ctx, location)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    models.Conflict(ctx)
+  })
+
+  lr.group.PATCH("/locations/:id", func(ctx *gin.Context) {
+
+    locationId := ctx.Param("id")
+    
+    var body models.LocationBody 
+    err := ctx.ShouldBindJSON(&body)
+    
+    if err != nil {
+      models.InvalidRequest(ctx) 
+    }
+
+    // validate if location exist
+
+    _, err = lr.handler.GetItem(locationId)
+
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+        models.NotFound(ctx)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    // if item exist then update the data
+    location, err := lr.handler.UpdateItem(body, locationId)
+
+    if err != nil {
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, location)
+  })
+
 }
+
