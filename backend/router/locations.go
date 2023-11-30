@@ -68,7 +68,7 @@ func( lr *LocationsRouter ) Setup() {
 
    })
 
-   lr.group.POST("/locations", func(ctx *gin.Context) {
+   lr.group.POST("/locations", lr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
     var body models.LocationBody
 
@@ -111,7 +111,7 @@ func( lr *LocationsRouter ) Setup() {
     models.Conflict(ctx)
   })
 
-  lr.group.PATCH("/locations/:id", func(ctx *gin.Context) {
+  lr.group.PATCH("/locations/:id", lr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
     locationId := ctx.Param("id")
     
@@ -151,5 +151,94 @@ func( lr *LocationsRouter ) Setup() {
     models.OK(ctx, location)
   })
 
+  lr.group.PUT("/locations/:id/publicate", func(ctx *gin.Context) {
+
+    locationId := ctx.Param("id")
+
+    _, err := lr.handler.GetItem(locationId)
+
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+
+        models.NotFound(ctx)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    success := lr.handler.PublicateItem(locationId)
+
+    if !success {
+
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, "Item successfully publicated!")
+  })
+
+  lr.group.PUT("/locations/:id/hide", func(ctx *gin.Context) {
+
+    locationId := ctx.Param("id")
+
+    _, err := lr.handler.GetItem(locationId)
+
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+
+        models.NotFound(ctx)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    success := lr.handler.HideItem(locationId)
+
+    if !success {
+
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, "This location is not public now!")
+  })
+
+  lr.group.DELETE("/locations/:id", func(ctx *gin.Context) {
+
+    locationId := ctx.Param("id")
+
+    _, err := lr.handler.GetItem(locationId)
+
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+
+        models.NotFound(ctx)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    success := lr.handler.DeleteItem(locationId)
+
+    if !success {
+
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, "Item successfully deleted!")
+  })
 }
 

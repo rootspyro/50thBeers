@@ -49,3 +49,39 @@ func( lh *LocationsHandler) UpdateItem( body models.LocationBody, locationId str
 
   return lh.locationsTable.UpdateLocation(body, locationId)
 }
+
+func( lh *LocationsHandler ) PublicateItem( locationId string ) bool {
+
+  success, err := lh.locationsTable.PublicateLocation(locationId)
+  
+  if  !success {
+    log.Println(err)
+    return false
+  }
+
+  return success 
+}
+
+func( lh *LocationsHandler ) HideItem( locationId string ) bool {
+
+  success, err := lh.locationsTable.HideLocation(locationId)
+  
+  if  !success {
+    log.Println(err)
+    return false
+  }
+
+  return success 
+}
+
+func( lh *LocationsHandler ) DeleteItem( locationId string ) bool {
+
+  success, err := lh.locationsTable.DeleteLocation(locationId)
+  
+  if  !success {
+    log.Println(err)
+    return false
+  }
+
+  return success 
+}

@@ -49,20 +49,6 @@ func NewLocationsTable( db *DB ) *LocationsTable {
            DefaultVal: "ASC",
          },
       },
-      // fields: []models.TableField{
-      //   {
-      //     FieldName: "location_name",
-      //     JSONExpected: "locationName",
-      //   },
-      //   {
-      //     FieldName: "google_maps",
-      //     JSONExpected: "mapsLink",
-      //   },
-      //   {
-      //     FieldName: "comments",
-      //     JSONExpected: "comments",
-      //   },
-      // },
    }
 }
 
@@ -327,4 +313,94 @@ func( lt *LocationsTable ) UpdateLocation( body models.LocationBody, locationId 
   }
 
   return lt.GetSingleLocation(locationId)
+}
+
+func( lt *LocationsTable ) PublicateLocation( locationId string ) ( bool, error ) {
+
+  timestamp := time.Now()
+  formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
+
+  query := fmt.Sprintf(
+    `
+      Update %s
+      Set 
+        status = '%s',
+        publicated_at = '%s',
+        updated_at = '%s'
+      Where
+        id = '%s'
+    `,
+    lt.table,
+    models.LocationsStatuses.Public,
+    formattedTimestamp,
+    formattedTimestamp,
+    locationId,
+  )
+
+  _, err := lt.db.Conn.Exec(query)
+
+  if err != nil {
+    return false, err
+  }
+
+  return true, nil
+  
+}
+
+func ( lt *LocationsTable ) HideLocation( locationId string ) ( bool, error ) {
+
+  timestamp := time.Now()
+  formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
+
+  query := fmt.Sprintf(
+    `
+      Update %s
+      Set 
+        status = '%s',
+        updated_at = '%s'
+      Where
+        id = '%s'
+    `,
+    lt.table,
+    models.LocationsStatuses.Created,
+    formattedTimestamp,
+    locationId,
+  )
+
+  _, err := lt.db.Conn.Exec(query)
+
+  if err != nil {
+    return false, err
+  }
+
+  return true, nil
+}
+
+func ( lt *LocationsTable ) DeleteLocation( locationId string ) ( bool, error ) {
+
+  timestamp := time.Now()
+  formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
+
+  query := fmt.Sprintf(
+    `
+      Update %s
+      Set 
+        status = '%s',
+        updated_at = '%s'
+      Where
+        id = '%s'
+    `,
+    lt.table,
+    models.LocationsStatuses.Deleted,
+    formattedTimestamp,
+    locationId,
+  )
+
+  _, err := lt.db.Conn.Exec(query)
+
+  if err != nil {
+    return false, err
+  }
+
+  return true, nil
 }
