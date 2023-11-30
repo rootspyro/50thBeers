@@ -6,6 +6,10 @@ type FILTER_TYPES struct {
    EqualNumber string // number = 0'
    Greater     string // age > 0
    Lower       string // age < 100
+   Limit       string // Limit  8
+   Offset      string // Offset 8
+   OrderBy     string // OrderBy name
+   Direction   string // ASC or DESC
 }
 
 var FilterTypes = FILTER_TYPES {
@@ -14,9 +18,14 @@ var FilterTypes = FILTER_TYPES {
    EqualNumber:   "equal to a number",
    Greater:       "greater than",
    Lower:         "lower than",
+   Limit:         "limit",
+   Offset:        "offset",
+   OrderBy:       "orderBy",
+   Direction:     "ASC or DESC",
 }
 
 type Filter struct {
-   Name    string 
-   Type    string
+   Name        string 
+   Type        string
+   DefaultVal  string 
 }

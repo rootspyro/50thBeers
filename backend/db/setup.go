@@ -51,41 +51,108 @@ func NewDBConnection(host, username, password, dbname, port string) *DB {
 
 func ( db *DB ) BuildWhere( params url.Values, filters []models.Filter ) string {
 
-   whereScript := ""
-   counter := 0
+  whereScript := ""
+  counter := 0
 
-   for index := range params {
+  for index := range params {
 
-      for _, filter := range filters {
+    for _, filter := range filters {
 
-         if index == filter.Name {
+      if index == filter.Name {
 
-            if counter > 0 {
-               whereScript += " and"
-            }
+        if counter > 0 {
+           whereScript += " and"
+        }
 
-            switch filter.Type {
+        switch filter.Type {
 
-            case models.FilterTypes.Like:
-               whereScript += fmt.Sprintf(" %s like '%%%s%%'", filter.Name, params.Get(index))
-               break
-            
-            case models.FilterTypes.EqualString:
-               whereScript += fmt.Sprintf(" %s = '%s'", filter.Name, params.Get(index))
-               break
-            }
-
-
-         }
+          case models.FilterTypes.Like:
+             whereScript += fmt.Sprintf(" %s Ilike '%%%s%%'", filter.Name, params.Get(index))
+             counter++
+             break
+          
+          case models.FilterTypes.EqualString:
+             whereScript += fmt.Sprintf(" %s = '%s'", filter.Name, params.Get(index))
+             counter++
+             break
+        }
       }
-
-      counter++
-
-   }
+    }
+  }
    
-   if whereScript != "" {
-      whereScript = "Where " + whereScript
-   }
+  if whereScript != "" {
+     whereScript = "Where " + whereScript
+  }
 
-   return whereScript
+  return whereScript
+}
+
+func (db *DB) BuildPagination( params url.Values, filters []models.Filter ) string {
+
+  var script, limitScript, offsetScript, orderByScript, direction string
+
+  for index := range params {
+    for _, filter := range filters {
+      if index == filter.Name {
+        switch filter.Type {
+          case models.FilterTypes.Limit:
+            limitScript = fmt.Sprintf(" Limit %s", params.Get(index))
+            break
+
+          case models.FilterTypes.Offset:
+            offsetScript = fmt.Sprintf(" Offset %s", params.Get(index))
+            break
+
+          case models.FilterTypes.OrderBy:
+            orderByScript = fmt.Sprintf(" Order By %s", params.Get(index))
+            break
+
+          case models.FilterTypes.Direction:
+            direction = fmt.Sprintf(" %s", params.Get(index))
+            break
+        } 
+      }
+    }
+  }
+
+  // Default Values
+
+  for _, filter := range filters {
+
+    switch filter.Type {
+      case models.FilterTypes.Limit:
+
+        if len(limitScript) == 0 {
+
+          limitScript = fmt.Sprintf("Limit %s", filter.DefaultVal)
+        }
+
+        break
+
+      case models.FilterTypes.Offset:
+
+        if len(offsetScript) == 0 {
+
+          offsetScript = fmt.Sprintf("Offset %s", filter.DefaultVal) 
+        }
+        break
+
+      case models.FilterTypes.OrderBy:
+
+        if len(orderByScript) == 0 {
+          orderByScript = fmt.Sprintf("Order By %s", filter.DefaultVal)
+        }
+        break
+
+      case models.FilterTypes.Direction:
+
+        if len(direction) == 0 {
+          direction = fmt.Sprintf(" %s", filter.DefaultVal)
+        }
+        break
+    }
+  }
+
+  script = fmt.Sprintf("%s %s %s %s", orderByScript, direction, limitScript, offsetScript)
+  return script
 }

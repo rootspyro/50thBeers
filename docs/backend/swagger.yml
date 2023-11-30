@@ -487,6 +487,22 @@ paths:
           in: query
           type: string
           required: false
+          
+        - name: limit
+          in: query
+          type: number
+          required: false
+        
+        - name: offset
+          in: query
+          type: number
+          required: false
+          
+        - name: orderBy
+          in: query
+          type: string
+          required: false
+          
       responses:
         200:
           description: ok
