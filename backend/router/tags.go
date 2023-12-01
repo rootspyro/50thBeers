@@ -75,7 +75,7 @@ func( tr *TagRouter ) Setup() {
       var body models.TagBody
 
       if err := ctx.ShouldBindJSON(&body); err != nil {
-         models.InvalidRequest(ctx)
+         models.InvalidRequest(ctx, err.Error())
          return
       }
 
@@ -125,7 +125,7 @@ func( tr *TagRouter ) Setup() {
       if err != nil {
 
          log.Println(err)
-         models.InvalidRequest(ctx)
+         models.InvalidRequest(ctx, err.Error())
          return
       }
 

@@ -32,11 +32,11 @@ func Created( ctx *gin.Context, data any ) {
 }
 
 // HTTP 400 INVALID REQUEST 
-func InvalidRequest( ctx *gin.Context ) {
+func InvalidRequest( ctx *gin.Context, data any ) {
    
    response := BasicResponse{
       Success: false,
-      Data: "Invalid request!",
+      Data: data,
    }
 
    ctx.JSON(400, response)

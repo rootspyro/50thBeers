@@ -50,7 +50,7 @@ func ( ur *UsersRouter ) Setup() {
 
       if err := ctx.ShouldBindJSON(&loginBody); err != nil {
    
-         models.InvalidRequest(ctx)
+         models.InvalidRequest(ctx, err.Error())
          return
       }
 

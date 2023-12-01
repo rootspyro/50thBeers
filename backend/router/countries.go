@@ -74,7 +74,7 @@ func( cr *CountriesRouter ) Setup() {
       var body models.CountryBody
 
       if err := ctx.ShouldBindJSON(&body); err != nil {
-         models.InvalidRequest(ctx)
+         models.InvalidRequest(ctx, err.Error())
          return
       }
 
@@ -119,8 +119,7 @@ func( cr *CountriesRouter ) Setup() {
       
       if err := ctx.ShouldBindJSON(&body); err != nil {
 
-         log.Println(err)
-         models.InvalidRequest(ctx)
+         models.InvalidRequest(ctx, err.Error())
          return
       }
 

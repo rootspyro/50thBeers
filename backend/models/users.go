@@ -23,6 +23,6 @@ type LoginResponse struct {
 }
 
 type LoginBody struct {
-   User     string `json:"user"` // it can be the username or email
-   Password string `json:"password"`
+  User     string `json:"user" binding:"required,min=3"` // it can be the username or email
+  Password string `json:"password" binding:"required,min=5"`
 }

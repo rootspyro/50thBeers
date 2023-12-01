@@ -15,5 +15,5 @@ type TagCollection struct {
 }
 
 type TagBody struct {
-   TagName string  `json:"tagname" binding:"required"`
+   TagName string  `json:"tagname" binding:"required,min=3"`
 }

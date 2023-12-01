@@ -74,7 +74,7 @@ func( lr *LocationsRouter ) Setup() {
 
     if err := ctx.ShouldBindJSON(&body); err != nil {
 
-      models.InvalidRequest(ctx)
+      models.InvalidRequest(ctx, err.Error())
       return
     } 
 
@@ -119,7 +119,7 @@ func( lr *LocationsRouter ) Setup() {
     err := ctx.ShouldBindJSON(&body)
     
     if err != nil {
-      models.InvalidRequest(ctx) 
+      models.InvalidRequest(ctx, err.Error()) 
     }
 
     // validate if location exist
