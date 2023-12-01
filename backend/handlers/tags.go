@@ -33,6 +33,7 @@ func( th *TagsHandler ) GetItems(params url.Values) (models.TagCollection, error
    tags = models.TagCollection{
       ItemsFound: itemsFound,
       Items: data,
+      Filters: th.tagsTable.Filters,
    }
 
    return tags, nil

@@ -13,19 +13,20 @@ type FILTER_TYPES struct {
 }
 
 var FilterTypes = FILTER_TYPES {
-   Like:          "like",
-   EqualString:   "equal to a string",
-   EqualNumber:   "equal to a number",
-   Greater:       "greater than",
-   Lower:         "lower than",
-   Limit:         "limit",
-   Offset:        "offset",
-   OrderBy:       "orderBy",
+   Like:          "Like",
+   EqualString:   "Equal",
+   EqualNumber:   "Equal",
+   Greater:       "Greater Than",
+   Lower:         "Lower than",
+   Limit:         "Limit",
+   Offset:        "Offset",
+   OrderBy:       "Order By",
    Direction:     "ASC or DESC",
 }
 
 type Filter struct {
-   Name        string 
-   Type        string
-   DefaultVal  string 
+  Name        string `json:"name"`
+  Type        string `json:"type"`
+  DefaultVal  string `json:"defaultValue"`
 }
+

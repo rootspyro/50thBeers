@@ -31,6 +31,7 @@ func( ch *CountriesHandler ) GetItems(params url.Values) ( models.CountryCollect
 
    countries.ItemsFound = itemsFound
    countries.Items = data
+   countries.Filters = ch.countriesTable.Filters
 
    return countries, err
 }

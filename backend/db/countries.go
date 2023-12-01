@@ -11,14 +11,14 @@ import (
 type CountriesTable struct {
    db      *DB
    table   string
-   filters []models.Filter
+   Filters []models.Filter
 }
 
 func NewCountriesTable( db *DB ) *CountriesTable {
    return &CountriesTable{
       db: db,
       table: "countries",
-      filters: []models.Filter{
+      Filters: []models.Filter{
          {
             Name: "country_name",
             Type: models.FilterTypes.Like,
@@ -42,7 +42,7 @@ func (ct *CountriesTable) GetAllCountries( params url.Values ) ( []models.Countr
 
    itemsFound := 0
 
-   whereScript := ct.db.BuildWhere(params, ct.filters)
+   whereScript := ct.db.BuildWhere(params, ct.Filters)
 
    if whereScript == "" {
       whereScript = fmt.Sprintf("where status = '%s'", models.CountriesStatuses.Default)

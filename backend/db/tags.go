@@ -12,14 +12,14 @@ import (
 type TagsTable struct {
    db      *DB
    table   string
-   filters []models.Filter
+   Filters []models.Filter
 }
 
 func NewTagsTable( db *DB ) *TagsTable {
    return &TagsTable{
       db: db,
       table: "tags",
-      filters: []models.Filter{
+      Filters: []models.Filter{
          {
             Name: "tagname",
             Type: models.FilterTypes.Like,
@@ -45,7 +45,7 @@ func ( tt *TagsTable ) GetAllTags( params url.Values ) ([]models.Tag, int, error
 
    itemsFound := 0
 
-   whereScript := tt.db.BuildWhere(params, tt.filters)
+   whereScript := tt.db.BuildWhere(params, tt.Filters)
 
    if whereScript == "" {
       whereScript = fmt.Sprintf("where status = '%s'", models.TagsStatuses.Default)

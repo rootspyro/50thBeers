@@ -11,6 +11,7 @@ type Country struct {
 type CountryCollection struct {
    ItemsFound int       `json:"itemsFound"`
    Items      []Country `json:"items"`
+   Filters    []Filter  `json:"avaiableFilters"` 
 }
 
 type CountryBody struct {

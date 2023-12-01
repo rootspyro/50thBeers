@@ -30,6 +30,7 @@ func( lh *LocationsHandler ) GetItems( params url.Values ) ( models.LocationsCol
 
    locations.ItemsFound = itemsFound
    locations.Items = data
+   locations.Filters = lh.locationsTable.Filters
 
    return locations, nil
 }

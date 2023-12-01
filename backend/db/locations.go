@@ -12,14 +12,14 @@ import (
 type LocationsTable struct {
    db       *DB
    table    string
-   filters  []models.Filter
+   Filters  []models.Filter
 }
 
 func NewLocationsTable( db *DB ) *LocationsTable {
    return &LocationsTable{
       db: db,
       table: "locations",
-      filters: []models.Filter{
+      Filters: []models.Filter{
          {
             Name: "location_name",
             Type: models.FilterTypes.Like,
@@ -74,8 +74,8 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
 
    itemsFound := 0
 
-   whereScript := lt.db.BuildWhere( params, lt.filters )
-   pagScript   := lt.db.BuildPagination(params, lt.filters)
+   whereScript := lt.db.BuildWhere( params, lt.Filters )
+   pagScript   := lt.db.BuildPagination(params, lt.Filters)
 
    // GET COUNT
 

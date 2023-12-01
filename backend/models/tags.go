@@ -9,8 +9,9 @@ type Tag struct {
 }
 
 type TagCollection struct {
-   ItemsFound int   `json:"itemsFound"`
-   Items      []Tag `json:"items"`
+   ItemsFound int      `json:"itemsFound"`
+   Items      []Tag    `json:"items"`
+   Filters    []Filter `json:"avaiableFilters"`
 }
 
 type TagBody struct {
