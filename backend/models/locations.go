@@ -14,7 +14,7 @@ type Location struct {
 type LocationsCollection struct {
    ItemsFound int        `json:"itemsFound"`
    Items      []Location `json:"items"`
-   Filters    []Filter   `josn:"avaiableFilters"`
+   Filters    []Filter   `json:"avaiableFilters"`
 }
 
 type LocationBody struct {
