@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2023-11-16T20:27:31.172Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36" etag="e3VIHiqMIq730Qe211yc" version="22.1.2" type="device">
+<mxfile host="app.diagrams.net" modified="2023-12-02T11:15:35.388Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36" etag="UIXWVR0SEr1w4qfQTV8y" version="22.1.5" type="device">
   <diagram name="Page-1" id="IJRMmhLQN1FgmMrM__ww">
     <mxGraphModel dx="794" dy="438" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -480,7 +480,7 @@
         <mxCell id="Nt1cPDlwA-iFf0WstdzG-87" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;startArrow=ERone;startFill=0;endArrow=ERoneToMany;endFill=0;" parent="1" source="Nt1cPDlwA-iFf0WstdzG-19" target="Nt1cPDlwA-iFf0WstdzG-84" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Nt1cPDlwA-iFf0WstdzG-106" value="Post_tags" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;" parent="1" vertex="1">
+        <mxCell id="Nt1cPDlwA-iFf0WstdzG-106" value="drinks_tags" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;" parent="1" vertex="1">
           <mxGeometry x="700" y="360" width="180" height="150" as="geometry" />
         </mxCell>
         <mxCell id="Nt1cPDlwA-iFf0WstdzG-107" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;top=0;left=0;right=0;bottom=1;" parent="Nt1cPDlwA-iFf0WstdzG-106" vertex="1">

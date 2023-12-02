@@ -1,23 +1,24 @@
 package models
 
 type Drink struct {
-  DrinkId      string  `json:"drinkId"`
-  DrinkName    string  `json:"drinkName"`
-  DrinkType    string  `json:"drinkType"`
-  CountryName  string  `json:"countryName"`
-  TastingDate  string  `json:"tastingDate"`
-  ABV          float32 `json:"abv"`
-  Rating       int     `json:"rating"`
-  PictureUrl   string  `json:"pictureUrl"`
-  LocationName string  `json:"locationName"`
-  Appearance   string  `json:"appearance"`
-  Aroma        string  `json:"aroma"`
-  Taste        string  `json:"taste"`
-  Comments     string  `json:"comments"`
-  CreatedAt    string  `json:"createdAt"`
-  PublicatedAt string  `json:"publicatedAt"`
-  UpdatedAt    string  `json:"updatedAt"`
-  Status       string  `json:"status"`
+  DrinkId      string   `json:"drinkId"`
+  DrinkName    string   `json:"drinkName"`
+  DrinkType    string   `json:"drinkType"`
+  CountryName  string   `json:"countryName"`
+  TastingDate  string   `json:"tastingDate"`
+  ABV          float32  `json:"abv"`
+  Rating       int      `json:"rating"`
+  PictureUrl   string   `json:"pictureUrl"`
+  LocationName string   `json:"locationName"`
+  Tags         []string `json:"tags"`
+  Appearance   string   `json:"appearance"`
+  Aroma        string   `json:"aroma"`
+  Taste        string   `json:"taste"`
+  Comments     string   `json:"comments"`
+  CreatedAt    string   `json:"createdAt"`
+  PublicatedAt string   `json:"publicatedAt"`
+  UpdatedAt    string   `json:"updatedAt"`
+  Status       string   `json:"status"`
 }
 
 type DrinkCollection struct {
