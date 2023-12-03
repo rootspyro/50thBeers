@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -52,16 +51,6 @@ func NewLocationsTable( db *DB ) *LocationsTable {
    }
 }
 
-// This function transforms a Text: "Hello wOrld" 
-// to a valid string id "hello_world"
-func( lt *LocationsTable ) NameToId( name string ) string {
-
-  name = strings.ToLower(name)
-  name = strings.ReplaceAll(name, " ", "_")
-
-  return name
-}
-
 func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Location, int, error ) {
 
    var (
@@ -90,8 +79,6 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
     lt.table,
     whereScript,
   )
-
-  fmt.Println(countQuery)
 
   err := lt.db.Conn.QueryRow(countQuery).Scan(&itemsFound)
   
@@ -197,7 +184,7 @@ func( lt *LocationsTable ) CreateLocation( body models.LocationBody ) ( models.L
     publicatedAt sql.NullString
   )
 
-  locationId = lt.NameToId(body.LocationName)
+  locationId = lt.db.NameToId(body.LocationName)
 
   query := fmt.Sprintf(
     `
