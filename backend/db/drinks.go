@@ -346,7 +346,15 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
   drink.Rating = int(rating.Int16)
   drink.PictureUrl = pictureUrl.String
   drink.LocationName = locationName.String
-  drink.Tags = Tags
+  // drink.Tags = Tags
+  if Tags == nil {
+
+    drink.Tags = []string{}
+
+  } else {
+
+    drink.Tags = Tags
+  }
   drink.Appearance = appearance
   drink.Aroma = aroma
   drink.Taste = taste
@@ -358,3 +366,12 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
 
   return drink, nil
 }
+
+// func( dt *DrinksTable ) CreateDrink( body models.DrinkPostBody ) (models.Drink, error) {
+//
+//   query := fmt.Sprintf(
+//     `
+//
+//     `
+//   )
+// }
