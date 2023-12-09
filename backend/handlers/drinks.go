@@ -34,3 +34,7 @@ func( dh *DrinksHandler ) GetItems( params url.Values ) ( models.DrinkCollection
 
   return drinks, nil
 } 
+
+func( dh *DrinksHandler ) GetItem( drinkId string ) ( models.Drink, error ) {
+  return dh.drinksTable.GetSingleDrink(drinkId) 
+}

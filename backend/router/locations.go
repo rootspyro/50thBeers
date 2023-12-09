@@ -46,7 +46,7 @@ func( lr *LocationsRouter ) Setup() {
       models.OK(ctx, data)
    })
 
-   lr.group.GET("/locations/:id", func(ctx *gin.Context) {
+   lr.group.GET("/locations/:id", lr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
     locationId := ctx.Param("id")
 

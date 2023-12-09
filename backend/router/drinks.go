@@ -4,6 +4,8 @@ import (
 	"50thbeers/auth"
 	"50thbeers/handlers"
 	"50thbeers/models"
+	"database/sql"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +31,7 @@ func NewDrinksRouter(
 
 func( dr *DrinksRouter ) Setup() {
 
-  dr.group.GET("/drinks", func(ctx *gin.Context) {
+  dr.group.GET("/drinks", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
     params := ctx.Request.URL.Query()
 
@@ -42,4 +44,26 @@ func( dr *DrinksRouter ) Setup() {
 
     models.OK(ctx, data)
   })
+
+  dr.group.GET("/drinks/:id", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
+
+    drinkId := ctx.Param("id") 
+
+    data, err := dr.handler.GetItem(drinkId) 
+    
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+        models.NotFound(ctx)
+        return
+      } 
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, data)
+  })
+
 }

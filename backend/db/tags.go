@@ -11,14 +11,14 @@ import (
 
 type TagsTable struct {
    db      *DB
-   table   string
+   Table   string
    Filters []models.Filter
 }
 
 func NewTagsTable( db *DB ) *TagsTable {
    return &TagsTable{
       db: db,
-      table: "tags",
+      Table: "tags",
       Filters: []models.Filter{
          {
             Name: "tagname",
@@ -59,7 +59,7 @@ func ( tt *TagsTable ) GetAllTags( params url.Values ) ([]models.Tag, int, error
          %s
          order by tagname
       `, 
-      tt.table,
+      tt.Table,
       whereScript,
    )
    rows, err := tt.db.Conn.Query(query)
@@ -112,7 +112,7 @@ func( tt *TagsTable ) GetSingleTag( tagId int ) (models.Tag, error) {
          where
             id = %d
       `,
-      tt.table,
+      tt.Table,
       tagId,
    )
 
@@ -142,7 +142,7 @@ func( tt *TagsTable ) SearchTagByName(name string) (models.Tag, error) {
          Where
             tagname = '%s'
       `,
-      tt.table,
+      tt.Table,
       name,
    )
 
@@ -175,7 +175,7 @@ func( tt *TagsTable ) CreateTag( data models.TagBody ) (models.Tag, error) {
          )
          Returning id
       `,
-      tt.table,
+      tt.Table,
       data.TagName,
    )
 
@@ -213,7 +213,7 @@ func( tt *TagsTable ) UpdateTag( data models.TagBody, tagId int ) (models.Tag, e
          Where
             id = %d
       `,
-      tt.table,
+      tt.Table,
       data.TagName,
       formattedTimestamp,
       tagId,
@@ -239,7 +239,7 @@ func(tt *TagsTable) DeleteTag(tagId int) ( bool, error ) {
          Where
             id = '%d'
       `,
-      tt.table,
+      tt.Table,
       tagId,
    )
 

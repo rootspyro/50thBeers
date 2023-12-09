@@ -10,17 +10,19 @@ import (
 type DrinksTable struct {
   db             *DB
   table          string
+  drinkTagsTable string
   tagsTable      string
   countryTable   string 
   locationsTable string 
   Filters        []models.Filter
 }
 
-func NewDrinksTable( db *DB, ct, lt string ) *DrinksTable {
+func NewDrinksTable( db *DB, tt, ct, lt string ) *DrinksTable {
   return &DrinksTable{
     db: db,
     table: "drinks",
-    tagsTable: "drinks_tabs",
+    drinkTagsTable: "drink_tags",
+    tagsTable: tt,
     countryTable: ct,
     locationsTable: lt,
     Filters: []models.Filter{
@@ -186,7 +188,7 @@ func( dt *DrinksTable ) GetAllDrinks( params url.Values ) ([]models.DrinkGeneral
 func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error ) {
 
   var (
-    drink        models.Drink
+    drink        models.Drink // drink data object
 
     drinkName    string
     drinkType    sql.NullString
@@ -196,7 +198,7 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
     rating       sql.NullInt16
     pictureUrl   sql.NullString
     locationName sql.NullString
-    // Tags         []string
+    Tags         []string
     appearance   string
     aroma        string
     taste        string
@@ -205,11 +207,13 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
     updatedAt    sql.NullString
     publicatedAt sql.NullString
     status       string
+
+    tagname          string // to read drink tags
   )
 
   query := fmt.Sprintf(
     `
-      Select distinc
+      Select distinct
         d.drink_id,
         d.drink_name,
         d.drink_type,
@@ -217,8 +221,12 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
         d.tasting_date,
         d.abv,
         d.rating,
-        l.location_name,
         d.picture_url,
+        l.location_name,
+        d.appearance,
+        d.aroma,
+        d.taste,
+        d.comments,
         d.created_at,
         d.publicated_at,
         d.updated_at,
@@ -228,7 +236,6 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
       Left Join %s c On d.country_id = c.id
       Left Join %s l On d.location_id = l.id
       Where drink_id = '%s'
-      
     `,
     dt.table,
     dt.countryTable,
@@ -260,6 +267,42 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
     return drink, err
   }
 
+  // Get Drink Tags
+  tagsQuery := fmt.Sprintf(
+    `
+      Select
+        t.tagname
+      From
+        %s t 
+      Join
+        %s dt
+      On 
+        t.id = dt.tag_id and dt.drink_id = '%s'
+    `,
+    dt.tagsTable,
+    dt.drinkTagsTable,
+    drinkId,
+  ) 
+
+  rows, err := dt.db.Conn.Query(tagsQuery)
+
+  if err != nil {
+
+    return drink, err
+  }
+
+  for rows.Next() {
+    
+    err := rows.Scan(
+      &tagname,
+    )
+
+    if err != nil {
+      return drink, err
+    }
+
+    Tags = append(Tags, tagname)
+  }
 
   // build the drink object
   drink.DrinkId = drinkId
@@ -271,7 +314,7 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
   drink.Rating = int(rating.Int16)
   drink.PictureUrl = pictureUrl.String
   drink.LocationName = locationName.String
-  drink.Tags = []string{}
+  drink.Tags = Tags
   drink.Appearance = appearance
   drink.Aroma = aroma
   drink.Taste = taste

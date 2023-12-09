@@ -39,7 +39,7 @@ func( sr *SetupRouter ) Setup() {
    tagsTable      := db.NewTagsTable(sr.db)
    countriesTable := db.NewCountriesTable(sr.db)
    locationsTable := db.NewLocationsTable(sr.db)
-   drinksTable    := db.NewDrinksTable(sr.db, countriesTable.Table, locationsTable.Table)
+   drinksTable    := db.NewDrinksTable(sr.db, tagsTable.Table, countriesTable.Table, locationsTable.Table)
 
    // HANDLERS SETUP
 
