@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"strconv"
 )
 
 type DrinksTable struct {
@@ -54,6 +55,10 @@ func NewDrinksTable( db *DB, tt, ct, lt string ) *DrinksTable {
         Name: "status",
         Type: models.FilterTypes.EqualString,
       },
+      {
+        Name: "tag_id",
+        Type: models.FilterTypes.Custom, 
+      },
     },
   }
 }
@@ -78,24 +83,47 @@ func( dt *DrinksTable ) GetAllDrinks( params url.Values ) ([]models.DrinkGeneral
     publicatedAt sql.NullString
     status       string
 
+    tagId        sql.NullInt16 // tagId var for filter
     itemsFound   int = 0
   )
 
   whereScript := dt.db.BuildWhere(params, dt.Filters)
   pagScript   := dt.db.BuildPagination(params, dt.Filters)
 
+  // Verify if tag_id filter exist!
+  for index := range params {
+
+    if index == "tag_id" {
+      
+      strTagId, _ := strconv.Atoi(params.Get(index)) 
+      tagId = sql.NullInt16{Int16: int16(strTagId), Valid: true}
+      break
+    }
+  }
+
   countQuery := fmt.Sprintf(
     `
-      Select
-        count(drink_id)
+      Select distinct
+        count(d.drink_id)
       From
-        %s
-      %s
+        %s d
     `,
     dt.table,
-    whereScript,
   )
 
+  if tagId.Int16 > 0 {
+    countQuery += fmt.Sprintf(
+      `
+      Inner Join
+        %s dt
+      On dt.drink_id = d.drink_id and dt.tag_id = %d
+      `,
+      dt.drinkTagsTable,
+      tagId.Int16,
+    )
+  }
+
+  countQuery += whereScript
   err := dt.db.Conn.QueryRow(countQuery).Scan(&itemsFound)
 
   if err != nil {
@@ -104,7 +132,7 @@ func( dt *DrinksTable ) GetAllDrinks( params url.Values ) ([]models.DrinkGeneral
 
   query := fmt.Sprintf(
     `
-      Select
+      Select distinct
         d.drink_id,
         d.drink_name,
         d.drink_type,
@@ -120,6 +148,9 @@ func( dt *DrinksTable ) GetAllDrinks( params url.Values ) ([]models.DrinkGeneral
         d.status
       From
         %s d
+      Inner join
+        %s dt
+      On dt.drink_id = d.drink_id and dt.tag_id = coalesce($1, dt.tag_id) 
       Left Join 
         %s c
       On d.country_id = c.id
@@ -130,13 +161,14 @@ func( dt *DrinksTable ) GetAllDrinks( params url.Values ) ([]models.DrinkGeneral
       %s
     `,
     dt.table,
+    dt.drinkTagsTable,
     dt.countryTable,
     dt.locationsTable,
     whereScript,
     pagScript,
   )
 
-  rows, err := dt.db.Conn.Query(query)
+  rows, err := dt.db.Conn.Query(query, tagId)
 
   if err != nil {
     return drinks, 0, nil
