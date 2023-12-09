@@ -10,14 +10,14 @@ import (
 
 type LocationsTable struct {
    db       *DB
-   table    string
+   Table    string
    Filters  []models.Filter
 }
 
 func NewLocationsTable( db *DB ) *LocationsTable {
    return &LocationsTable{
       db: db,
-      table: "locations",
+      Table: "locations",
       Filters: []models.Filter{
          {
             Name: "location_name",
@@ -76,7 +76,7 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
         %s
       %s
     `,
-    lt.table,
+    lt.Table,
     whereScript,
   )
 
@@ -97,7 +97,7 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
          %s
          %s
       `,
-      lt.table,
+      lt.Table,
       whereScript,
       pagScript,
    )
@@ -150,7 +150,7 @@ func (lt *LocationsTable) GetSingleLocation( locationId string ) ( models.Locati
       From %s
       Where id = '%s'
     `,
-    lt.table,
+    lt.Table,
     locationId,
   )
 
@@ -204,7 +204,7 @@ func( lt *LocationsTable ) CreateLocation( body models.LocationBody ) ( models.L
       )
       Returning *
     `,
-    lt.table,
+    lt.Table,
     locationId,
     body.LocationName,
     body.MapsLink,
@@ -288,7 +288,7 @@ func( lt *LocationsTable ) UpdateLocation( body models.LocationBody, locationId 
         %s
       Where id = '%s'
     `,
-    lt.table,
+    lt.Table,
     script,
     locationId,
   )
@@ -317,7 +317,7 @@ func( lt *LocationsTable ) PublicateLocation( locationId string ) ( bool, error 
       Where
         id = '%s'
     `,
-    lt.table,
+    lt.Table,
     models.LocationsStatuses.Public,
     formattedTimestamp,
     formattedTimestamp,
@@ -348,7 +348,7 @@ func ( lt *LocationsTable ) HideLocation( locationId string ) ( bool, error ) {
       Where
         id = '%s'
     `,
-    lt.table,
+    lt.Table,
     models.LocationsStatuses.Created,
     formattedTimestamp,
     locationId,
@@ -377,7 +377,7 @@ func ( lt *LocationsTable ) DeleteLocation( locationId string ) ( bool, error ) 
       Where
         id = '%s'
     `,
-    lt.table,
+    lt.Table,
     models.LocationsStatuses.Deleted,
     formattedTimestamp,
     locationId,
