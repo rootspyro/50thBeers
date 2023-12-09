@@ -2,6 +2,7 @@ package db
 
 import (
 	"50thbeers/models"
+	"50thbeers/utils"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -369,9 +370,27 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
 
 // func( dt *DrinksTable ) CreateDrink( body models.DrinkPostBody ) (models.Drink, error) {
 //
+//   var (
+//     drink models.Drink
+//   )
+//
+//   newDrinkId := utils.NameToId(body.DrinkName)
+//
 //   query := fmt.Sprintf(
 //     `
+//       Insert
+//       into %s
+//       (
+//         drink_id
+//       ),
+//       Values(
 //
-//     `
+//       )
+//       Returning
+//
+//     `,
+//     dt.table,
 //   )
+//
+//   return drink, nil
 // }

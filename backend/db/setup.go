@@ -50,16 +50,6 @@ func NewDBConnection(host, username, password, dbname, port string) *DB {
    }
 }
 
-// This function transforms a Text: "Hello wOrld" 
-// to a valid string id "hello_world"
-func( db *DB ) NameToId( name string ) string {
-
-  name = strings.ToLower(name)
-  name = strings.ReplaceAll(name, " ", "_")
-
-  return name
-}
-
 func ( db *DB ) BuildWhere( params url.Values, filters []models.Filter ) string {
 
   whereScript := ""

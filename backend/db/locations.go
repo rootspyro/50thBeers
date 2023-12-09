@@ -2,6 +2,7 @@ package db
 
 import (
 	"50thbeers/models"
+	"50thbeers/utils"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -184,7 +185,7 @@ func( lt *LocationsTable ) CreateLocation( body models.LocationBody ) ( models.L
     publicatedAt sql.NullString
   )
 
-  locationId = lt.db.NameToId(body.LocationName)
+  locationId = utils.NameToId(body.LocationName)
 
   query := fmt.Sprintf(
     `

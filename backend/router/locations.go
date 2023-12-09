@@ -4,6 +4,7 @@ import (
 	"50thbeers/auth"
 	"50thbeers/handlers"
 	"50thbeers/models"
+	"50thbeers/utils"
 	"database/sql"
 	"log"
 	"strings"
@@ -78,9 +79,7 @@ func( lr *LocationsRouter ) Setup() {
       return
     } 
 
-    // we convert the name to the id
-    newId := strings.ToLower(body.LocationName)
-    newId = strings.ReplaceAll(newId, " ", "_")
+    newId := utils.NameToId(body.LocationName)
 
     // search if the item already exist
     _, err := lr.handler.GetItem(newId)
