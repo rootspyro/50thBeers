@@ -493,7 +493,6 @@ func(dt *DrinksTable) UpdateDrink( body models.DrinkPatchBody, drinkId string ) 
     drinkId,
   )
 
-  fmt.Println(query)
   _, err := dt.db.Conn.Exec(query)
 
   if err != nil {
@@ -502,3 +501,44 @@ func(dt *DrinksTable) UpdateDrink( body models.DrinkPatchBody, drinkId string ) 
 
   return dt.GetSingleDrink(drinkId)
 }
+
+func(dt *DrinksTable) ChangeStatus( drinkId string, status string ) (bool, error) {
+
+  timestamp := time.Now()
+  formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
+
+  script := fmt.Sprintf(
+    `
+      status = '%s',
+      updated_at = '%s'
+    `, 
+    status,
+    formattedTimestamp,
+  )
+
+  if status == models.DrinksStatuses.Public {
+    script += fmt.Sprintf(", publicated_at = '%s'", formattedTimestamp) 
+  }
+
+  query := fmt.Sprintf(
+    `
+      Update %s
+      Set
+        %s
+      Where
+        drink_id = '%s'
+    `,
+    dt.table,
+    script,
+    drinkId,
+  )
+
+  _, err := dt.db.Conn.Exec(query)
+
+  if err != nil {
+    return false, err
+  }
+
+  return true, nil
+}
+

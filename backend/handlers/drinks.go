@@ -47,3 +47,14 @@ func( dh *DrinksHandler ) CreateItem( body models.DrinkPostBody, drinkId string 
 func( dh *DrinksHandler ) UpdateItem( body models.DrinkPatchBody, drinkId string ) ( models.Drink, error )  {
   return dh.drinksTable.UpdateDrink(body, drinkId)
 }
+
+func( dh *DrinksHandler ) ChangeItemStatus( drinkId string, status string ) bool {
+  
+  success, err := dh.drinksTable.ChangeStatus(drinkId, status)
+
+  if err != nil {
+    log.Println(err)
+  }
+
+  return success 
+}

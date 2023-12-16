@@ -151,4 +151,57 @@ func( dr *DrinksRouter ) Setup() {
 
     models.OK(ctx, drink)
   })
+
+  dr.group.PUT("/drinks/:id/publish", func(ctx *gin.Context) {
+
+    drinkId := ctx.Param("id")
+
+    success := dr.handler.ChangeItemStatus(
+      drinkId,
+      models.DrinksStatuses.Public,
+    )
+
+    if !success {
+      models.ServerError(ctx) 
+      return
+    }
+
+    models.OK(ctx, "Drink successfully publicated")
+
+  })
+
+  dr.group.PUT("/drinks/:id/hide", func(ctx *gin.Context) {
+
+    drinkId := ctx.Param("id")
+
+    success := dr.handler.ChangeItemStatus(
+      drinkId,
+      models.DrinksStatuses.Created,
+    )
+
+    if !success {
+      models.ServerError(ctx) 
+      return
+    }
+
+    models.OK(ctx, "Now the drink is not public!")
+
+  })
+
+  dr.group.DELETE("/drinks/:id", func(ctx *gin.Context) {
+
+    drinkId := ctx.Param("id")
+
+    success := dr.handler.ChangeItemStatus(
+      drinkId,
+      models.DrinksStatuses.Deleted,
+    )
+
+    if !success {
+      models.ServerError(ctx) 
+      return
+    }
+
+    models.OK(ctx, "Drink successfully deleted!")
+  })
 }

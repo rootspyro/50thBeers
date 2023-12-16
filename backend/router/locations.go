@@ -150,7 +150,7 @@ func( lr *LocationsRouter ) Setup() {
     models.OK(ctx, location)
   })
 
-  lr.group.PUT("/locations/:id/publicate", func(ctx *gin.Context) {
+  lr.group.PUT("/locations/:id/publish", func(ctx *gin.Context) {
 
     locationId := ctx.Param("id")
 
