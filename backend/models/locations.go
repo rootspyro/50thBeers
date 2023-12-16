@@ -18,8 +18,26 @@ type LocationsCollection struct {
 }
 
 type LocationBody struct {
-  LocationName string `json:"locationName" binding:"min=5"`
-  MapsLink     string `json:"mapsLink" binding:"min=5"`
-  Comments     string `json:"comments" binding:"min=10"`
+  LocationName string `json:"locationName"`
+  MapsLink     string `json:"mapsLink"`
+  Comments     string `json:"comments"`
 }
 
+var LocationsTable = []TableFields {
+  {
+    StructName: "LocationId",
+    FieldName: "id",
+  },
+  {
+    StructName: "LocationName",
+    FieldName: "location_name",
+  },
+  {
+    StructName: "MapsLink",
+    FieldName: "google_maps",
+  },
+  {
+    StructName: "Comments",
+    FieldName: "comments",
+  },
+}

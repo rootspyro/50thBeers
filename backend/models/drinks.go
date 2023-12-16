@@ -60,16 +60,16 @@ type DrinkPostBody struct {
 }
 
 type DrinkPatchBody struct {
-  DrinkName    string  `json:"drinkName" binding:"min=5"`
-  DrinkType    string  `json:"drinkType" binding:"min=5"`
+  DrinkName    string  `json:"drinkName"`
+  DrinkType    string  `json:"drinkType"`
   CountryId    int     `json:"countryId"`
-  TastingDate  string  `json:"tastingDate" binding:"min=10,max=10"`
+  TastingDate  string  `json:"tastingDate"`
   ABV          float32 `json:"abv"`
   Rating       int     `json:"rating"`
-  PictureUrl   string  `json:"pictureUrl" binding:"min=10"`
+  PictureUrl   string  `json:"pictureUrl"`
   LocationId   string  `json:"locationId"`
-  Appearance   string  `json:"appearance" binding:"min=10"`
-  Aroma        string  `json:"aroma" binding:"min=10"`
-  Taste        string  `json:"taste" binding:"min=10"`
-  Comments     string  `json:"comments" binding:"min=10"`
+  Appearance   string  `json:"appearance"`
+  Aroma        string  `json:"aroma"`
+  Taste        string  `json:"taste"`
+  Comments     string  `json:"comments"`
 }

@@ -241,46 +241,10 @@ func( lt *LocationsTable ) UpdateLocation( body models.LocationBody, locationId 
   timestamp := time.Now()
   formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
 
-  // ------- REFACTOR CODE SECTION INIT ------- // 
-
   // creates the query
   script := ""
-  anotherValueExists := false
-
-  if len(body.LocationName) > 0 {
-
-    script += fmt.Sprintf("location_name = '%s'", body.LocationName)
-    anotherValueExists = true
-    
-  }
-
-  if len(body.MapsLink) > 0 {
-
-    if anotherValueExists {
-      script += ", "
-    }
-
-    script += fmt.Sprintf("google_maps = '%s'", body.MapsLink) 
-    anotherValueExists = true
-  }
-
-  if len(body.Comments) > 0 {
-
-    if anotherValueExists {
-      script += ", "
-    }
-
-    script += fmt.Sprintf("comments = '%s'", body.Comments) 
-    anotherValueExists = true
-  }
-  
-  if anotherValueExists {
-    script += ", "
-  }
-
+  script = lt.db.BuildUpdate(body, models.LocationsTable)
   script += fmt.Sprintf("updated_at = '%s'", formattedTimestamp)
-
-  // ------- REFACTOR CODE SECTION END ------- // 
 
   query := fmt.Sprintf(
     `

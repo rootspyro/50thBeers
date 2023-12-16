@@ -32,3 +32,8 @@ type Filter struct {
   DefaultVal  string `json:"defaultValue"`
 }
 
+// this object specify the relation between the Models structs and tables
+type TableFields struct {
+  StructName string
+  FieldName  string
+}
