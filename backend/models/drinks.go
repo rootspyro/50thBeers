@@ -60,16 +60,71 @@ type DrinkPostBody struct {
 }
 
 type DrinkPatchBody struct {
-  DrinkName    string  `json:"drinkName"`
-  DrinkType    string  `json:"drinkType"`
-  CountryId    int     `json:"countryId"`
-  TastingDate  string  `json:"tastingDate"`
-  ABV          float32 `json:"abv"`
-  Rating       int     `json:"rating"`
-  PictureUrl   string  `json:"pictureUrl"`
-  LocationId   string  `json:"locationId"`
-  Appearance   string  `json:"appearance"`
-  Aroma        string  `json:"aroma"`
-  Taste        string  `json:"taste"`
-  Comments     string  `json:"comments"`
+  DrinkName    *string  `json:"drinkName"`
+  DrinkType    *string  `json:"drinkType"`
+  CountryId    *int     `json:"countryId"`
+  TastingDate  *string  `json:"tastingDate"`
+  ABV          *float32 `json:"abv"`
+  Rating       *int     `json:"rating"`
+  PictureUrl   *string  `json:"pictureUrl"`
+  LocationId   *string  `json:"locationId"`
+  Appearance   *string  `json:"appearance"`
+  Aroma        *string  `json:"aroma"`
+  Taste        *string  `json:"taste"`
+  Comments     *string  `json:"comments"`
+}
+
+var DrinksTable = []TableFields {
+  {
+    StructName: "DrinkId",
+    FieldName:  "drink_id",
+  },
+  {
+    StructName: "DrinkName",
+    FieldName:  "drink_name",
+  },
+  {
+    StructName: "DrinkType",
+    FieldName:  "drink_type",
+  },
+  {
+    StructName: "CountryId",
+    FieldName:  "country_id",
+  },
+  {
+    StructName: "TastingDate",
+    FieldName:  "tasting_date",
+  },
+  {
+    StructName: "ABV",
+    FieldName:  "abv",
+  },
+  {
+    StructName: "Rating",
+    FieldName:  "rating",
+  },
+  {
+    StructName: "PictureUrl",
+    FieldName:  "picture_url",
+  },
+  {
+    StructName: "LocationId",
+    FieldName:  "location_id",
+  },
+  {
+    StructName: "Appearance",
+    FieldName:  "appearance",
+  },
+  {
+    StructName: "Aroma",
+    FieldName:  "aroma",
+  },
+  {
+    StructName: "Taste",
+    FieldName:  "taste",
+  },
+  {
+    StructName: "Comments",
+    FieldName:  "comments",
+  },
 }

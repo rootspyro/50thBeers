@@ -43,3 +43,7 @@ func( dh *DrinksHandler ) CreateItem( body models.DrinkPostBody, drinkId string 
   
   return dh.drinksTable.CreateDrink(body, drinkId)
 }
+
+func( dh *DrinksHandler ) UpdateItem( body models.DrinkPatchBody, drinkId string ) ( models.Drink, error )  {
+  return dh.drinksTable.UpdateDrink(body, drinkId)
+}

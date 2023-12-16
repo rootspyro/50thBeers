@@ -18,9 +18,15 @@ type LocationsCollection struct {
 }
 
 type LocationBody struct {
-  LocationName string `json:"locationName"`
-  MapsLink     string `json:"mapsLink"`
+  LocationName string `json:"locationName" binding:"required"`
+  MapsLink     string `json:"mapsLink" binding:"required"`
   Comments     string `json:"comments"`
+}
+
+type LocationPatchBody struct {
+  LocationName *string `json:"locationName"`
+  MapsLink     *string `json:"mapsLink"`
+  Comments     *string `json:"comments"`
 }
 
 var LocationsTable = []TableFields {

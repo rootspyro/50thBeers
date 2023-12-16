@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 type DrinksTable struct {
@@ -464,4 +465,40 @@ func( dt *DrinksTable ) CreateDrink( body models.DrinkPostBody, drinkId string )
   }
 
   return drink, nil
+}
+
+func(dt *DrinksTable) UpdateDrink( body models.DrinkPatchBody, drinkId string ) ( models.Drink, error ) {
+
+  var (
+    drink models.Drink
+  )
+
+  timestamp := time.Now()
+  formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
+
+  // create the update query
+  
+  script := dt.db.BuildUpdate(body, models.DrinksTable)
+  script += fmt.Sprintf("updated_at = '%s'", formattedTimestamp)
+
+  query := fmt.Sprintf(
+    `
+      Update %s
+      Set
+        %s
+      Where drink_id = '%s'
+    `,
+    dt.table,
+    script,
+    drinkId,
+  )
+
+  fmt.Println(query)
+  _, err := dt.db.Conn.Exec(query)
+
+  if err != nil {
+    return drink, err
+  }
+
+  return dt.GetSingleDrink(drinkId)
 }

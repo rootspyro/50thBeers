@@ -111,4 +111,44 @@ func( dr *DrinksRouter ) Setup() {
     models.Conflict(ctx)
     return
   })
+
+  dr.group.PATCH("/drinks/:id", func(ctx *gin.Context) {
+
+    drinkId := ctx.Param("id")
+
+    var body models.DrinkPatchBody
+    err := ctx.ShouldBindJSON(&body)
+
+    if err != nil {
+      models.InvalidRequest(ctx, err.Error())
+      return
+    }
+  
+    // validate if drink exist
+    _, err = dr.handler.GetItem(drinkId)
+
+    if err != nil {
+      
+      if err == sql.ErrNoRows {
+        models.NotFound(ctx)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    // if drink exist -> updates the data
+    drink, err := dr.handler.UpdateItem(body, drinkId) 
+
+    if err != nil {
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, drink)
+  })
 }

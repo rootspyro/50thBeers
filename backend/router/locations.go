@@ -113,11 +113,12 @@ func( lr *LocationsRouter ) Setup() {
 
     locationId := ctx.Param("id")
     
-    var body models.LocationBody 
+    var body models.LocationPatchBody 
     err := ctx.ShouldBindJSON(&body)
     
     if err != nil {
       models.InvalidRequest(ctx, err.Error()) 
+      return
     }
 
     // validate if location exist

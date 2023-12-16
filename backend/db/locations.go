@@ -234,7 +234,7 @@ func( lt *LocationsTable ) CreateLocation( body models.LocationBody ) ( models.L
   return location, nil
 }
 
-func( lt *LocationsTable ) UpdateLocation( body models.LocationBody, locationId string) ( models.Location, error ) {
+func( lt *LocationsTable ) UpdateLocation( body models.LocationPatchBody, locationId string) ( models.Location, error ) {
 
   var location models.Location
 
