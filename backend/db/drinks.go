@@ -2,7 +2,6 @@ package db
 
 import (
 	"50thbeers/models"
-	"50thbeers/utils"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -368,29 +367,101 @@ func( dt *DrinksTable ) GetSingleDrink( drinkId string ) ( models.Drink, error )
   return drink, nil
 }
 
-// func( dt *DrinksTable ) CreateDrink( body models.DrinkPostBody ) (models.Drink, error) {
-//
-//   var (
-//     drink models.Drink
-//   )
-//
-//   newDrinkId := utils.NameToId(body.DrinkName)
-//
-//   query := fmt.Sprintf(
-//     `
-//       Insert
-//       into %s
-//       (
-//         drink_id
-//       ),
-//       Values(
-//
-//       )
-//       Returning
-//
-//     `,
-//     dt.table,
-//   )
-//
-//   return drink, nil
-// }
+func( dt *DrinksTable ) CreateDrink( body models.DrinkPostBody, drinkId string ) (models.Drink, error) {
+
+  var (
+    drink   models.Drink
+    newId   string
+  )
+
+  query := fmt.Sprintf(
+    `
+      Insert
+      into %s
+      (
+        drink_id,
+        drink_name,
+        drink_type,
+        country_id,
+        tasting_date,
+        abv,
+        rating,
+        picture_url,
+        location_id,
+        appearance,
+        aroma,
+        taste,
+        comments
+      )
+      Values(
+        '%s',
+        '%s',
+        '%s',
+        %d,
+        '%s',
+        %f,
+        %d,
+        '%s',
+        '%s',
+        '%s',
+        '%s',
+        '%s',
+        '%s'
+      )
+      Returning drink_id
+    `,
+    dt.table,
+    drinkId,
+    body.DrinkName,
+    body.DrinkType,
+    body.CountryId,
+    body.TastingDate,
+    body.ABV,
+    body.Rating,
+    body.PictureUrl,
+    body.LocationId,
+    body.Appearance,
+    body.Aroma,
+    body.Taste,
+    body.Comments,
+  )
+
+  // if the drinks was created get the created ID
+  err := dt.db.Conn.QueryRow(query).Scan(
+    &newId,
+  )
+
+  if err != nil {
+    return drink, err
+  }
+
+  // add tags if exist
+
+  if len(body.Tags) > 0 {
+
+    tagsQuery := fmt.Sprintf("Insert into %s(drink_id, tag_id) values", dt.drinkTagsTable) 
+
+    for i, tagId :=  range body.Tags {
+
+      tagsQuery += fmt.Sprintf("('%s', %d)", drinkId, tagId)
+      
+      if i < len(body.Tags) - 1 {
+        tagsQuery += ", "
+      }
+    } 
+    _, err = dt.db.Conn.Exec(tagsQuery)
+
+    if err != nil {
+      return drink, err 
+    }
+  }
+
+  // get the data
+  drink, err = dt.GetSingleDrink(newId)
+
+  if err != nil {
+    return drink, err
+  }
+
+  return drink, nil
+}

@@ -50,12 +50,13 @@ type DrinkPostBody struct {
   TastingDate  string  `json:"tastingDate" binding:"required,min=10,max=10"`
   ABV          float32 `json:"abv"`
   Rating       int     `json:"rating" binding:"required"`
-  PictureUrl   string  `json:"pictureUrl" binding:"min=10"`
-  LocationId   int     `json:"locationId"`
+  PictureUrl   string  `json:"pictureUrl"`
+  LocationId   string  `json:"locationId"`
+  Tags         []int   `json:"tags"`
   Appearance   string  `json:"appearance" binding:"required,min=10"`
   Aroma        string  `json:"aroma" binding:"required,min=10"`
   Taste        string  `json:"taste" binding:"required,min=10"`
-  Comments     string  `json:"comments" binding:"required,min=10"`
+  Comments     string  `json:"comments"`
 }
 
 type DrinkPatchBody struct {
@@ -66,7 +67,7 @@ type DrinkPatchBody struct {
   ABV          float32 `json:"abv"`
   Rating       int     `json:"rating"`
   PictureUrl   string  `json:"pictureUrl" binding:"min=10"`
-  LocationId   int     `json:"locationId"`
+  LocationId   string  `json:"locationId"`
   Appearance   string  `json:"appearance" binding:"min=10"`
   Aroma        string  `json:"aroma" binding:"min=10"`
   Taste        string  `json:"taste" binding:"min=10"`

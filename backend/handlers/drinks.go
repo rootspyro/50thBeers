@@ -38,3 +38,8 @@ func( dh *DrinksHandler ) GetItems( params url.Values ) ( models.DrinkCollection
 func( dh *DrinksHandler ) GetItem( drinkId string ) ( models.Drink, error ) {
   return dh.drinksTable.GetSingleDrink(drinkId) 
 }
+
+func( dh *DrinksHandler ) CreateItem( body models.DrinkPostBody, drinkId string )  ( models.Drink, error ) {
+  
+  return dh.drinksTable.CreateDrink(body, drinkId)
+}

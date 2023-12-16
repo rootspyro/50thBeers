@@ -7,7 +7,6 @@ import (
 	"50thbeers/utils"
 	"database/sql"
 	"log"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
