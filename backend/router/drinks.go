@@ -32,7 +32,7 @@ func NewDrinksRouter(
 
 func( dr *DrinksRouter ) Setup() {
 
-  dr.group.GET("/drinks", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
+  dr.group.GET("/drinks/", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
     params := ctx.Request.URL.Query()
 
@@ -112,7 +112,7 @@ func( dr *DrinksRouter ) Setup() {
     return
   })
 
-  dr.group.PATCH("/drinks/:id", func(ctx *gin.Context) {
+  dr.group.PATCH("/drinks/:id", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
     drinkId := ctx.Param("id")
 
@@ -152,7 +152,7 @@ func( dr *DrinksRouter ) Setup() {
     models.OK(ctx, drink)
   })
 
-  dr.group.PUT("/drinks/:id/publish", func(ctx *gin.Context) {
+  dr.group.PUT("/drinks/:id/publish", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
     drinkId := ctx.Param("id")
 
@@ -170,7 +170,7 @@ func( dr *DrinksRouter ) Setup() {
 
   })
 
-  dr.group.PUT("/drinks/:id/hide", func(ctx *gin.Context) {
+  dr.group.PUT("/drinks/:id/hide", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
     drinkId := ctx.Param("id")
 
@@ -188,7 +188,7 @@ func( dr *DrinksRouter ) Setup() {
 
   })
 
-  dr.group.DELETE("/drinks/:id", func(ctx *gin.Context) {
+  dr.group.DELETE("/drinks/:id", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
 
     drinkId := ctx.Param("id")
 
@@ -203,5 +203,40 @@ func( dr *DrinksRouter ) Setup() {
     }
 
     models.OK(ctx, "Drink successfully deleted!")
+  })
+
+  dr.group.GET("/drinks/:id/tags/", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
+
+    drinkId := ctx.Param("id")
+    drinkTags, err := dr.handler.GetItemTags(drinkId) 
+
+    if err != nil {
+      models.ServerError(ctx)
+      return
+    }
+
+    models.OK(ctx, drinkTags)
+  })
+
+  dr.group.GET("/drinks/:id/tags/:tagId", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
+
+    drinkId := ctx.Param("id")
+    tagId   := ctx.Param("tagId")
+
+    tag, err := dr.handler.GetItemTag(drinkId, tagId)
+
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+        models.NotFound(ctx)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return 
+    }
+
+    models.OK(ctx, tag)
   })
 }

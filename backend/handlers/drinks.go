@@ -5,6 +5,7 @@ import (
 	"50thbeers/models"
 	"log"
 	"net/url"
+	"strconv"
 )
 
 type DrinksHandler struct {
@@ -57,4 +58,29 @@ func( dh *DrinksHandler ) ChangeItemStatus( drinkId string, status string ) bool
   }
 
   return success 
+}
+
+func( dh *DrinksHandler ) GetItemTags( drinkId string ) ( models.DrinkTagsCollection, error ) {
+  
+  var drinkTags models.DrinkTagsCollection
+
+  tags, itemsFound, err := dh.drinksTable.GetDrinkTags(drinkId)
+
+  if err != nil {
+
+    log.Println(err)
+    return drinkTags, err
+  }
+
+  drinkTags.Items = tags
+  drinkTags.ItemsFound = itemsFound
+
+  return drinkTags, nil
+}
+
+func( dh *DrinksHandler ) GetItemTag( drinkId string, tagId string ) ( models.DrinkTags, error ) {
+
+  intTagId, _ := strconv.Atoi(tagId) 
+
+  return dh.drinksTable.GetDrinkSingleTag(drinkId, intTagId)
 }

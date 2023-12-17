@@ -542,3 +542,78 @@ func(dt *DrinksTable) ChangeStatus( drinkId string, status string ) (bool, error
   return true, nil
 }
 
+func(dt *DrinksTable ) GetDrinkTags(drinkId string) ([]models.DrinkTags, int, error)  {
+
+  var (
+    tag        models.DrinkTags
+    drinkTags  []models.DrinkTags
+    itemsFound int
+  )
+
+  query := fmt.Sprintf(
+    `
+      Select 
+        dt.tag_id,
+        t.tagname
+      From
+        %s dt
+      Inner Join %s t
+        On dt.tag_id = t.id and dt.drink_id = '%s'
+    `,
+    dt.drinkTagsTable,
+    dt.tagsTable,
+    drinkId,
+  )
+
+  rows, err := dt.db.Conn.Query(query)
+
+  if err != nil {
+
+    return drinkTags, 0, err
+  }
+
+  for rows.Next() {
+
+    itemsFound++
+    err := rows.Scan(
+      &tag.TagId,
+      &tag.Tagname,
+    )
+
+    if err != nil {
+      return drinkTags, 0, err
+    }
+
+    drinkTags = append(drinkTags, tag)
+  }
+
+  return drinkTags, itemsFound, nil
+}
+
+func( dt *DrinksTable ) GetDrinkSingleTag( drinkId string, tagId int ) ( models.DrinkTags, error) {
+
+  var drinkTag models.DrinkTags
+
+  query := fmt.Sprintf(
+    `
+      Select 
+        dt.tag_id,
+        t.tagname
+      From
+        %s dt
+      Inner Join %s t
+        On dt.tag_id = t.id and dt.drink_id = '%s' and t.id = %d
+    `,
+    dt.drinkTagsTable,
+    dt.tagsTable,
+    drinkId,
+    tagId,
+  )
+
+  err := dt.db.Conn.QueryRow(query).Scan(
+    &drinkTag.TagId,
+    &drinkTag.Tagname,
+  )
+
+  return drinkTag, err
+}

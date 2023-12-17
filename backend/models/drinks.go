@@ -128,3 +128,14 @@ var DrinksTable = []TableFields {
     FieldName:  "comments",
   },
 }
+
+type DrinkTags struct {
+  TagId   int    `json:"tagId"`
+  Tagname string `json:"tagname"`
+}
+
+type DrinkTagsCollection struct {
+  ItemsFound int         `json:"itemsFound"`
+  Items      []DrinkTags `json:"items"`
+}
+
