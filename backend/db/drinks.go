@@ -617,3 +617,33 @@ func( dt *DrinksTable ) GetDrinkSingleTag( drinkId string, tagId int ) ( models.
 
   return drinkTag, err
 }
+
+func( dt *DrinksTable ) CreateDrinkTag( body models.DrinkTagsPostBody, drinkId string ) ( models.DrinkTags, error ) {
+
+  var newTag models.DrinkTags
+
+  query := fmt.Sprintf(
+    `
+      Insert into %s
+      (
+        drink_id,
+        tag_id
+      )
+      Values(
+        '%s',
+        %d
+      )
+    `,
+    dt.drinkTagsTable,
+    drinkId,
+    body.TagId,
+  )
+
+  _, err := dt.db.Conn.Exec(query)
+
+  if err != nil {
+    return newTag, err
+  }
+
+  return dt.GetDrinkSingleTag(drinkId, body.TagId)
+}

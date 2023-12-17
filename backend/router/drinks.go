@@ -6,32 +6,39 @@ import (
 	"50thbeers/models"
 	"50thbeers/utils"
 	"database/sql"
+	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type DrinksRouter struct {
-  group   *gin.RouterGroup
-  handler *handlers.DrinksHandler
-  auth    *auth.AuthHandler
+  group       *gin.RouterGroup
+  handler     *handlers.DrinksHandler
+  auth        *auth.AuthHandler
+  tagsHandler *handlers.TagsHandler
 }
 
 func NewDrinksRouter(
-  g *gin.RouterGroup,
-  h *handlers.DrinksHandler,
-  a *auth.AuthHandler,
+  g  *gin.RouterGroup,
+  h  *handlers.DrinksHandler,
+  a  *auth.AuthHandler,
+  th *handlers.TagsHandler,
 ) *DrinksRouter {
 
   return &DrinksRouter{
     group: g, 
     handler: h,
     auth: a,
+    tagsHandler: th,
   }
 } 
 
 func( dr *DrinksRouter ) Setup() {
 
+  // refactor to routes - handler declarations
+  // Example: GET("/drinks", auth.APIKeyMiddleware(), dr.handler.GetItems(ctx))
   dr.group.GET("/drinks/", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
     params := ctx.Request.URL.Query()
@@ -220,8 +227,15 @@ func( dr *DrinksRouter ) Setup() {
 
   dr.group.GET("/drinks/:id/tags/:tagId", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
-    drinkId := ctx.Param("id")
-    tagId   := ctx.Param("tagId")
+    drinkId  := ctx.Param("id")
+    strTagId := ctx.Param("tagId")
+
+    tagId, err := strconv.Atoi( strTagId )
+
+    if err != nil {
+      models.InvalidRequest(ctx, err.Error())
+      return
+    }
 
     tag, err := dr.handler.GetItemTag(drinkId, tagId)
 
@@ -238,5 +252,56 @@ func( dr *DrinksRouter ) Setup() {
     }
 
     models.OK(ctx, tag)
+  })
+
+  dr.group.POST("/drinks/:id/tags/", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
+  
+    var body models.DrinkTagsPostBody
+
+    if err := ctx.ShouldBindJSON(&body); err != nil {
+      models.InvalidRequest(ctx, err.Error())
+      return
+    }
+
+    // validate if tag exist
+    
+    if _, err := dr.tagsHandler.GetItem(fmt.Sprint(body.TagId)); err != nil {
+
+      ctx.JSON(404, models.BasicResponse{
+        Success: false,
+        Data: "This tag doesn't exist!",
+      })
+      return
+    } 
+
+    drinkId := ctx.Param("id")
+
+    // validate if the tag is already assigned to the drink
+     _, err := dr.handler.GetItemTag(drinkId, body.TagId)
+
+    if err != nil {
+
+      if err == sql.ErrNoRows {
+
+        // add the tag
+        newTag, err := dr.handler.CreateItemTag(body, drinkId) 
+
+        if err != nil {
+
+          log.Println(err)
+          models.ServerError(ctx)
+          return
+        }
+
+        models.Created(ctx, newTag)
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    }
+
+    models.Conflict(ctx)
   })
 }

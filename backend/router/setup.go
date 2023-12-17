@@ -55,7 +55,7 @@ func( sr *SetupRouter ) Setup() {
    tagsPath      := NewTagsRouter(v1, tagsHandler, authHandler)
    countriesPath := NewCountriesRouter(v1, countriesHandler, authHandler)
    locationsPath := NewLocationsRouter(v1, locationsHandler, authHandler)
-   drinksPath    := NewDrinksRouter(v1, drinksHandler, authHandler)
+   drinksPath    := NewDrinksRouter(v1, drinksHandler, authHandler, tagsHandler)
 
    healthPath.Setup()
    usersPath.Setup()
