@@ -79,7 +79,7 @@ func( dh *DrinksHandler ) GetItemTags( drinkId string ) ( models.DrinkTagsCollec
 
 func( dh *DrinksHandler ) GetItemTag( drinkId string, tagId int ) ( models.DrinkTags, error ) {
 
-  return dh.drinksTable.GetDrinkSingleTag(drinkId, tagId)
+  return dh.drinksTable.GetSingleDrinkTag(drinkId, tagId)
 }
 
 func( dh *DrinksHandler ) CreateItemTag( body models.DrinkTagsPostBody, drinkId string ) ( models.DrinkTags, error ) {
@@ -87,3 +87,7 @@ func( dh *DrinksHandler ) CreateItemTag( body models.DrinkTagsPostBody, drinkId 
   return dh.drinksTable.CreateDrinkTag(body, drinkId)
 }
 
+
+func( dh *DrinksHandler ) UpdateItemTag( body models.DrinkTagsPostBody, tagId int, drinkId string ) ( models.DrinkTags, error ) {
+  return dh.drinksTable.UpdateDrinkTag( body, tagId, drinkId )
+}

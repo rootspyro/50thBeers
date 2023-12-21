@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -303,5 +304,108 @@ func( dr *DrinksRouter ) Setup() {
     }
 
     models.Conflict(ctx)
+  })
+
+  dr.group.PATCH("/drinks/:id/tags/:tagId", func(ctx *gin.Context) {
+    
+    params := ctx.Params
+    drinkId, exist := params.Get("id")
+
+    if !exist {
+
+      models.InvalidRequest(ctx, "Drink id most be provided")
+      return
+    }
+
+    strTagId, exist := params.Get("tagId")
+
+    if !exist {
+
+      models.InvalidRequest(ctx, "Tag id most be provided")
+      return
+    }
+
+    tagId, err := strconv.Atoi(strTagId)
+
+    if err != nil {
+
+      models.InvalidRequest(ctx, err.Error())
+      return
+    }
+
+    var body models.DrinkTagsPostBody
+    err = ctx.ShouldBindJSON(&body)
+
+    if err != nil {
+
+      models.InvalidRequest(ctx, err.Error())
+      return
+    }
+
+    // validate that the tag exists
+
+    if _, err := dr.tagsHandler.GetItem(fmt.Sprint(body.TagId)); err != nil {
+
+      if err == sql.ErrNoRows {
+
+        ctx.JSON(http.StatusNotFound, models.BasicResponse{
+          Success: false,
+          Data: "This tag doesn't exist!",
+        })
+        return
+      }
+
+      log.Println(err)
+      models.ServerError(ctx)
+      return
+    } 
+
+    // validate if the drink already has the new tag provided
+    if _, err := dr.handler.GetItemTag(drinkId, body.TagId); err != nil {
+
+      if err == sql.ErrNoRows {
+        
+        // validate the current tag is actually assigned 
+
+        _, err := dr.handler.GetItemTag(drinkId, tagId)
+
+        if err != nil {
+
+          if err == sql.ErrNoRows {
+            
+            ctx.JSON(http.StatusNotFound, models.BasicResponse{
+              Success: false,
+              Data: "The drink does not have the tag to be changed",
+            })
+            
+            return
+          }
+
+          models.ServerError(ctx)
+          log.Println(err)
+          return
+        }
+
+        data, err := dr.handler.UpdateItemTag(body,tagId, drinkId)
+
+        if err != nil {
+          models.ServerError(ctx)
+          log.Println(err)
+          return
+        }
+
+        models.OK(ctx, data)
+        return
+      } 
+
+      models.ServerError(ctx)
+      log.Println(err)
+      return
+    }
+
+    ctx.JSON(http.StatusConflict, models.BasicResponse{
+      Success: false,
+      Data: "The drink already has this tag",
+    })
   })
 }

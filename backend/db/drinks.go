@@ -590,7 +590,7 @@ func(dt *DrinksTable ) GetDrinkTags(drinkId string) ([]models.DrinkTags, int, er
   return drinkTags, itemsFound, nil
 }
 
-func( dt *DrinksTable ) GetDrinkSingleTag( drinkId string, tagId int ) ( models.DrinkTags, error) {
+func( dt *DrinksTable ) GetSingleDrinkTag( drinkId string, tagId int ) ( models.DrinkTags, error) {
 
   var drinkTag models.DrinkTags
 
@@ -645,5 +645,35 @@ func( dt *DrinksTable ) CreateDrinkTag( body models.DrinkTagsPostBody, drinkId s
     return newTag, err
   }
 
-  return dt.GetDrinkSingleTag(drinkId, body.TagId)
+  return dt.GetSingleDrinkTag(drinkId, body.TagId)
+}
+
+func( dt *DrinksTable ) UpdateDrinkTag( body models.DrinkTagsPostBody, tagId int, drinkId string ) ( models.DrinkTags, error ){
+
+  var (
+    tag models.DrinkTags
+  )
+
+  // This query replaces the tag_id = drinkId to the new Id give it on the request body
+  query := fmt.Sprintf(
+    `
+      Update %s
+      Set
+        tag_id = %d
+      Where tag_id = %d and drink_id = '%s'
+    `,
+    dt.drinkTagsTable,
+    body.TagId, 
+    tagId,
+    drinkId,
+  )
+
+  _, err := dt.db.Conn.Exec(query) 
+
+  if err != nil {
+    return tag, err
+  }
+
+  tag, err = dt.GetSingleDrinkTag(drinkId, body.TagId)
+  return tag, nil
 }

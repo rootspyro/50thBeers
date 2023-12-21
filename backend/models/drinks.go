@@ -142,3 +142,4 @@ type DrinkTagsCollection struct {
 type DrinkTagsPostBody struct {
   TagId int `json:"tagId"`
 }
+
