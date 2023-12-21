@@ -677,3 +677,25 @@ func( dt *DrinksTable ) UpdateDrinkTag( body models.DrinkTagsPostBody, tagId int
   tag, err = dt.GetSingleDrinkTag(drinkId, body.TagId)
   return tag, nil
 }
+
+func( dt *DrinksTable ) DeleteDrinkTag(tagId int, drinkId string) error {
+
+  query := fmt.Sprintf(
+    `
+      Delete from %s
+      Where tag_id = %d and drink_id = '%s'
+    `,
+    dt.drinkTagsTable, 
+    tagId,
+    drinkId,
+  )
+
+  _, err := dt.db.Conn.Exec(query) 
+
+  if err != nil {
+
+    return err
+  }
+
+  return nil
+}

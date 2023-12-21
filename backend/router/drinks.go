@@ -408,4 +408,6 @@ func( dr *DrinksRouter ) Setup() {
       Data: "The drink already has this tag",
     })
   })
+
+  dr.group.DELETE("/drinks/:id/tags/:tagId", dr.auth.AuthMiddleware(), dr.handler.DeleteItemTag)
 }

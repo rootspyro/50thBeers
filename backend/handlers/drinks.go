@@ -3,8 +3,13 @@ package handlers
 import (
 	"50thbeers/db"
 	"50thbeers/models"
+	"database/sql"
 	"log"
+	"net/http"
 	"net/url"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type DrinksHandler struct {
@@ -90,4 +95,65 @@ func( dh *DrinksHandler ) CreateItemTag( body models.DrinkTagsPostBody, drinkId 
 
 func( dh *DrinksHandler ) UpdateItemTag( body models.DrinkTagsPostBody, tagId int, drinkId string ) ( models.DrinkTags, error ) {
   return dh.drinksTable.UpdateDrinkTag( body, tagId, drinkId )
+}
+
+func( dh *DrinksHandler ) DeleteItemTag( ctx *gin.Context ) {
+
+  drinkId  := ctx.Param("id") 
+  strTagId := ctx.Param("tagId")
+
+  tagId, err := strconv.Atoi(strTagId)
+
+  if err != nil {
+
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
+
+  // validate that the drink exist
+
+  _, err = dh.GetItem(drinkId)
+
+  if err != nil {
+
+    if err == sql.ErrNoRows {
+
+      models.NotFound(ctx)
+      return
+    }
+
+    models.ServerError(ctx)
+    log.Println(err)
+    return
+  }
+
+  // validate that the tag is actually assigned to the drink
+  _, err = dh.GetItemTag(drinkId, tagId)
+
+  if err != nil {
+
+    if err == sql.ErrNoRows {
+
+      ctx.JSON(http.StatusNotFound, models.BasicResponse {
+        Success: false,
+        Data: "The tag is not assigned to this drink",
+      })
+      return
+    }
+
+    models.ServerError(ctx)
+    log.Println(err)
+    return
+  } 
+
+  err = dh.drinksTable.DeleteDrinkTag(tagId, drinkId)
+
+  if err != nil {
+
+    models.ServerError(ctx)
+    log.Println(err)
+    return
+  }
+
+  models.OK(ctx, "Tag removed from the drink")
 }
