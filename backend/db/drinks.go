@@ -149,9 +149,24 @@ func( dt *DrinksTable ) GetAllDrinks( params url.Values ) ([]models.DrinkGeneral
         d.status
       From
         %s d
-      Inner join
-        %s dt
-      On dt.drink_id = d.drink_id and dt.tag_id = coalesce($1, dt.tag_id) 
+    `,
+    dt.table,
+  )
+  
+  if tagId.Int16 > 0 {
+    query += fmt.Sprintf(
+      `
+        Inner Join
+          %s dt
+        On dt.drink_id = d.drink_id and dt.tag_id = %d
+      `,
+      dt.drinkTagsTable,
+      tagId.Int16,
+    )
+  } 
+
+  query += fmt.Sprintf(
+    `
       Left Join 
         %s c
       On d.country_id = c.id
@@ -161,15 +176,13 @@ func( dt *DrinksTable ) GetAllDrinks( params url.Values ) ([]models.DrinkGeneral
       %s
       %s
     `,
-    dt.table,
-    dt.drinkTagsTable,
     dt.countryTable,
     dt.locationsTable,
     whereScript,
     pagScript,
   )
 
-  rows, err := dt.db.Conn.Query(query, tagId)
+  rows, err := dt.db.Conn.Query(query)
 
   if err != nil {
     return drinks, 0, nil
