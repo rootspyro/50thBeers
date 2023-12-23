@@ -10,14 +10,14 @@ import (
 
 type CountriesTable struct {
    db      *DB
-   table   string
+   Table   string
    Filters []models.Filter
 }
 
 func NewCountriesTable( db *DB ) *CountriesTable {
    return &CountriesTable{
       db: db,
-      table: "countries",
+      Table: "countries",
       Filters: []models.Filter{
          {
             Name: "country_name",
@@ -56,7 +56,7 @@ func (ct *CountriesTable) GetAllCountries( params url.Values ) ( []models.Countr
             %s
          %s
       `,
-      ct.table,
+      ct.Table,
       whereScript,
    )
 
@@ -105,7 +105,7 @@ func( ct *CountriesTable ) GetSingleCountry(countryId int) (models.Country, erro
          Where
             id = %d and status = '%s'
       `,
-      ct.table,
+      ct.Table,
       countryId,
       models.CountriesStatuses.Default,
    )
@@ -139,7 +139,7 @@ func( ct *CountriesTable ) SearchCountryByName(name string) (models.Country, err
          Where
             country_name = '%s'
       `,
-      ct.table,
+      ct.Table,
       name,
    )
 
@@ -176,7 +176,7 @@ func( ct *CountriesTable ) CreateCountry(body models.CountryBody) ( models.Count
          )
          Returning id
       `,
-      ct.table,
+      ct.Table,
       body.CountryName,
    )
 
@@ -208,7 +208,7 @@ func( ct *CountriesTable ) UpdateCountry(body models.CountryBody, countryId int)
          Where
             id = '%d'
       `,
-      ct.table,
+      ct.Table,
       body.CountryName,
       formattedTimestamp,
       countryId,
@@ -233,7 +233,7 @@ func( ct *CountriesTable ) DeleteCountry(countryId int) ( bool, error ) {
          Where
             id = '%d'
       `,
-      ct.table,
+      ct.Table,
       countryId,
    )
 

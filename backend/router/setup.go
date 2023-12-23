@@ -39,6 +39,7 @@ func( sr *SetupRouter ) Setup() {
    tagsTable      := db.NewTagsTable(sr.db)
    countriesTable := db.NewCountriesTable(sr.db)
    locationsTable := db.NewLocationsTable(sr.db)
+   drinksTable    := db.NewDrinksTable(sr.db, tagsTable.Table, countriesTable.Table, locationsTable.Table)
 
    // HANDLERS SETUP
 
@@ -46,6 +47,7 @@ func( sr *SetupRouter ) Setup() {
    tagsHandler      := handlers.NewTagsHandler(tagsTable)
    countriesHandler := handlers.NewCountriesHandler(countriesTable)
    locationsHandler := handlers.NewLocationsHandler(locationsTable) 
+   drinksHandler    := handlers.NewDrinksHandler(drinksTable)
 
    // PATHS SETUP
    healthPath    := NewHealthRouter(v1, sr.db)
@@ -53,12 +55,14 @@ func( sr *SetupRouter ) Setup() {
    tagsPath      := NewTagsRouter(v1, tagsHandler, authHandler)
    countriesPath := NewCountriesRouter(v1, countriesHandler, authHandler)
    locationsPath := NewLocationsRouter(v1, locationsHandler, authHandler)
+   drinksPath    := NewDrinksRouter(v1, drinksHandler, authHandler, tagsHandler)
 
    healthPath.Setup()
    usersPath.Setup()
    tagsPath.Setup()
    countriesPath.Setup()
    locationsPath.Setup()
+   drinksPath.Setup()
 
    // NOT FOUND
    sr.server.NoRoute(func(ctx *gin.Context) {

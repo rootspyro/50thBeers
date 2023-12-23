@@ -2,23 +2,23 @@ package db
 
 import (
 	"50thbeers/models"
+	"50thbeers/utils"
 	"database/sql"
 	"fmt"
 	"net/url"
-	"strings"
 	"time"
 )
 
 type LocationsTable struct {
    db       *DB
-   table    string
+   Table    string
    Filters  []models.Filter
 }
 
 func NewLocationsTable( db *DB ) *LocationsTable {
    return &LocationsTable{
       db: db,
-      table: "locations",
+      Table: "locations",
       Filters: []models.Filter{
          {
             Name: "location_name",
@@ -52,16 +52,6 @@ func NewLocationsTable( db *DB ) *LocationsTable {
    }
 }
 
-// This function transforms a Text: "Hello wOrld" 
-// to a valid string id "hello_world"
-func( lt *LocationsTable ) NameToId( name string ) string {
-
-  name = strings.ToLower(name)
-  name = strings.ReplaceAll(name, " ", "_")
-
-  return name
-}
-
 func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Location, int, error ) {
 
    var (
@@ -87,11 +77,9 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
         %s
       %s
     `,
-    lt.table,
+    lt.Table,
     whereScript,
   )
-
-  fmt.Println(countQuery)
 
   err := lt.db.Conn.QueryRow(countQuery).Scan(&itemsFound)
   
@@ -110,7 +98,7 @@ func( lt *LocationsTable ) GetAllLocations( params url.Values ) ( []models.Locat
          %s
          %s
       `,
-      lt.table,
+      lt.Table,
       whereScript,
       pagScript,
    )
@@ -163,7 +151,7 @@ func (lt *LocationsTable) GetSingleLocation( locationId string ) ( models.Locati
       From %s
       Where id = '%s'
     `,
-    lt.table,
+    lt.Table,
     locationId,
   )
 
@@ -197,7 +185,7 @@ func( lt *LocationsTable ) CreateLocation( body models.LocationBody ) ( models.L
     publicatedAt sql.NullString
   )
 
-  locationId = lt.NameToId(body.LocationName)
+  locationId = utils.NameToId(body.LocationName)
 
   query := fmt.Sprintf(
     `
@@ -217,7 +205,7 @@ func( lt *LocationsTable ) CreateLocation( body models.LocationBody ) ( models.L
       )
       Returning *
     `,
-    lt.table,
+    lt.Table,
     locationId,
     body.LocationName,
     body.MapsLink,
@@ -246,53 +234,17 @@ func( lt *LocationsTable ) CreateLocation( body models.LocationBody ) ( models.L
   return location, nil
 }
 
-func( lt *LocationsTable ) UpdateLocation( body models.LocationBody, locationId string) ( models.Location, error ) {
+func( lt *LocationsTable ) UpdateLocation( body models.LocationPatchBody, locationId string) ( models.Location, error ) {
 
   var location models.Location
 
   timestamp := time.Now()
   formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
 
-  // ------- REFACTOR CODE SECTION INIT ------- // 
-
   // creates the query
   script := ""
-  anotherValueExists := false
-
-  if len(body.LocationName) > 0 {
-
-    script += fmt.Sprintf("location_name = '%s'", body.LocationName)
-    anotherValueExists = true
-    
-  }
-
-  if len(body.MapsLink) > 0 {
-
-    if anotherValueExists {
-      script += ", "
-    }
-
-    script += fmt.Sprintf("google_maps = '%s'", body.MapsLink) 
-    anotherValueExists = true
-  }
-
-  if len(body.Comments) > 0 {
-
-    if anotherValueExists {
-      script += ", "
-    }
-
-    script += fmt.Sprintf("comments = '%s'", body.Comments) 
-    anotherValueExists = true
-  }
-  
-  if anotherValueExists {
-    script += ", "
-  }
-
+  script = lt.db.BuildUpdate(body, models.LocationsTable)
   script += fmt.Sprintf("updated_at = '%s'", formattedTimestamp)
-
-  // ------- REFACTOR CODE SECTION END ------- // 
 
   query := fmt.Sprintf(
     `
@@ -301,7 +253,7 @@ func( lt *LocationsTable ) UpdateLocation( body models.LocationBody, locationId 
         %s
       Where id = '%s'
     `,
-    lt.table,
+    lt.Table,
     script,
     locationId,
   )
@@ -330,7 +282,7 @@ func( lt *LocationsTable ) PublicateLocation( locationId string ) ( bool, error 
       Where
         id = '%s'
     `,
-    lt.table,
+    lt.Table,
     models.LocationsStatuses.Public,
     formattedTimestamp,
     formattedTimestamp,
@@ -361,7 +313,7 @@ func ( lt *LocationsTable ) HideLocation( locationId string ) ( bool, error ) {
       Where
         id = '%s'
     `,
-    lt.table,
+    lt.Table,
     models.LocationsStatuses.Created,
     formattedTimestamp,
     locationId,
@@ -390,7 +342,7 @@ func ( lt *LocationsTable ) DeleteLocation( locationId string ) ( bool, error ) 
       Where
         id = '%s'
     `,
-    lt.table,
+    lt.Table,
     models.LocationsStatuses.Deleted,
     formattedTimestamp,
     locationId,

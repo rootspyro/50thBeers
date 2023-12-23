@@ -4,9 +4,9 @@ import (
 	"50thbeers/auth"
 	"50thbeers/handlers"
 	"50thbeers/models"
+	"50thbeers/utils"
 	"database/sql"
 	"log"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -46,7 +46,7 @@ func( lr *LocationsRouter ) Setup() {
       models.OK(ctx, data)
    })
 
-   lr.group.GET("/locations/:id", func(ctx *gin.Context) {
+   lr.group.GET("/locations/:id", lr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
 
     locationId := ctx.Param("id")
 
@@ -78,9 +78,7 @@ func( lr *LocationsRouter ) Setup() {
       return
     } 
 
-    // we convert the name to the id
-    newId := strings.ToLower(body.LocationName)
-    newId = strings.ReplaceAll(newId, " ", "_")
+    newId := utils.NameToId(body.LocationName)
 
     // search if the item already exist
     _, err := lr.handler.GetItem(newId)
@@ -115,11 +113,12 @@ func( lr *LocationsRouter ) Setup() {
 
     locationId := ctx.Param("id")
     
-    var body models.LocationBody 
+    var body models.LocationPatchBody 
     err := ctx.ShouldBindJSON(&body)
     
     if err != nil {
       models.InvalidRequest(ctx, err.Error()) 
+      return
     }
 
     // validate if location exist
@@ -151,7 +150,7 @@ func( lr *LocationsRouter ) Setup() {
     models.OK(ctx, location)
   })
 
-  lr.group.PUT("/locations/:id/publicate", func(ctx *gin.Context) {
+  lr.group.PUT("/locations/:id/publish", func(ctx *gin.Context) {
 
     locationId := ctx.Param("id")
 

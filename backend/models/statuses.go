@@ -25,6 +25,13 @@ type LOCATIONS_STATUSES struct {
    Default string
 }
 
+type DRINKS_STATUSES struct {
+   Public  string
+   Created string
+   Deleted string
+   Default string
+}
+
 var UserStatuses = USER_STATUSES {
    Avaiable: "AVAIABLE",
    Deleted:  "DELETED",
@@ -45,6 +52,13 @@ var CountriesStatuses = COUNTRIES_STATUSES {
 
 
 var LocationsStatuses = LOCATIONS_STATUSES {
+  Public:  "PUBLIC",
+  Created: "CREATED",
+  Deleted: "DELETED",
+  Default: "CREATED",
+}
+
+var DrinksStatuses = DRINKS_STATUSES {
   Public:  "PUBLIC",
   Created: "CREATED",
   Deleted: "DELETED",

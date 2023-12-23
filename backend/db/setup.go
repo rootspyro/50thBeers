@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"reflect"
 
 	_ "github.com/lib/pq"
 )
@@ -154,5 +155,80 @@ func (db *DB) BuildPagination( params url.Values, filters []models.Filter ) stri
   }
 
   script = fmt.Sprintf("%s %s %s %s", orderByScript, direction, limitScript, offsetScript)
+  return script
+}
+
+// func(db *DB) BuildUpdate(input interface{}, fieldsNames []models.TableFields) string {
+//  
+//   script := ""
+//   values := reflect.ValueOf(input)
+//   structType := values.Type()
+//   numFields := values.NumField()
+//
+//   for i := 0; i < numFields; i++ {
+//
+//     field := structType.Field(i)
+//     value := values.Field(i)
+//
+//     for _, data := range fieldsNames {
+//      
+//       if data.StructName == field.Name {
+//
+//         if len(value.String()) > 0 {
+//
+//           varType := fmt.Sprintf("%s", field.Type) 
+//           if varType == "string" {
+//
+//             script += fmt.Sprintf("\n%s = '%s',", data.FieldName, value)
+//
+//           } else {
+//
+//             script += fmt.Sprintf("\n%s = %v,", data.FieldName, value)
+//           }  
+//         }
+//
+//       }
+//     }
+//   }
+//
+//   return script
+// }
+
+func(db *DB) BuildUpdate(input interface{}, fieldsNames []models.TableFields) string {
+  
+  script := ""
+  values := reflect.ValueOf(input)
+  structType := values.Type()
+  numFields := values.NumField()
+
+  for i := 0; i < numFields; i++ {
+
+    field := structType.Field(i)
+    value := values.Field(i)
+
+    for _, data := range fieldsNames {
+      
+      if data.StructName == field.Name {
+
+        if value.Kind() == reflect.Ptr && !value.IsNil() {
+
+          pointerValue := value.Elem()
+
+          varType := fmt.Sprintf("%s", field.Type) 
+
+          if varType == "*string" {
+
+            script += fmt.Sprintf("\n%s = '%s',", data.FieldName, pointerValue)
+
+          } else {
+
+            script += fmt.Sprintf("\n%s = %v,", data.FieldName, pointerValue)
+          }  
+        }
+
+      }
+    }
+  }
+
   return script
 }

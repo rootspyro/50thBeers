@@ -46,7 +46,7 @@ func( lh *LocationsHandler ) CreateItem( body models.LocationBody ) ( models.Loc
   return lh.locationsTable.CreateLocation(body)
 }
 
-func( lh *LocationsHandler) UpdateItem( body models.LocationBody, locationId string ) ( models.Location, error ) {
+func( lh *LocationsHandler) UpdateItem( body models.LocationPatchBody, locationId string ) ( models.Location, error ) {
 
   return lh.locationsTable.UpdateLocation(body, locationId)
 }

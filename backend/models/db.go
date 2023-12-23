@@ -10,6 +10,7 @@ type FILTER_TYPES struct {
    Offset      string // Offset 8
    OrderBy     string // OrderBy name
    Direction   string // ASC or DESC
+   Custom      string
 }
 
 var FilterTypes = FILTER_TYPES {
@@ -22,6 +23,7 @@ var FilterTypes = FILTER_TYPES {
    Offset:        "Offset",
    OrderBy:       "Order By",
    Direction:     "ASC or DESC",
+   Custom:        "Reserved for customized filters",
 }
 
 type Filter struct {
@@ -30,3 +32,8 @@ type Filter struct {
   DefaultVal  string `json:"defaultValue"`
 }
 
+// this object specify the relation between the Models structs and tables
+type TableFields struct {
+  StructName string
+  FieldName  string
+}
