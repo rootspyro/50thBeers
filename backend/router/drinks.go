@@ -2,11 +2,11 @@ package router
 
 import (
 	"50thbeers/auth"
+	"50thbeers/db"
 	"50thbeers/handlers"
 	"50thbeers/models"
 	"50thbeers/utils"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -18,21 +18,21 @@ type DrinksRouter struct {
   group       *gin.RouterGroup
   handler     *handlers.DrinksHandler
   auth        *auth.AuthHandler
-  tagsHandler *handlers.TagsHandler
+  tagsTable   *db.TagsTable
 }
 
 func NewDrinksRouter(
   g  *gin.RouterGroup,
   h  *handlers.DrinksHandler,
   a  *auth.AuthHandler,
-  th *handlers.TagsHandler,
+  tt *db.TagsTable,
 ) *DrinksRouter {
 
   return &DrinksRouter{
     group: g, 
     handler: h,
     auth: a,
-    tagsHandler: th,
+    tagsTable: tt,
   }
 } 
 
@@ -266,7 +266,7 @@ func( dr *DrinksRouter ) Setup() {
 
     // validate if tag exist
     
-    if _, err := dr.tagsHandler.GetItem(fmt.Sprint(body.TagId)); err != nil {
+    if _, err := dr.tagsTable.GetSingleTag(body.TagId); err != nil {
 
       ctx.JSON(404, models.BasicResponse{
         Success: false,
@@ -344,7 +344,7 @@ func( dr *DrinksRouter ) Setup() {
 
     // validate that the tag exists
 
-    if _, err := dr.tagsHandler.GetItem(fmt.Sprint(body.TagId)); err != nil {
+    if _, err := dr.tagsTable.GetSingleTag(body.TagId); err != nil {
 
       if err == sql.ErrNoRows {
 

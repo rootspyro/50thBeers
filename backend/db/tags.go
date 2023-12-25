@@ -230,7 +230,7 @@ func( tt *TagsTable ) UpdateTag( data models.TagBody, tagId int ) (models.Tag, e
    return tag, err 
 } 
 
-func(tt *TagsTable) DeleteTag(tagId int) ( bool, error ) {
+func(tt *TagsTable) DeleteTag(tagId int) error {
 
    query := fmt.Sprintf(
       `
@@ -245,10 +245,5 @@ func(tt *TagsTable) DeleteTag(tagId int) ( bool, error ) {
 
    _, err := tt.db.Conn.Exec(query)
 
-   if err != nil {
-
-      return false, err
-   }
-
-   return true, nil
+   return err
 }

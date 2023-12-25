@@ -3,9 +3,6 @@ package router
 import (
 	"50thbeers/auth"
 	"50thbeers/handlers"
-	"50thbeers/models"
-	"database/sql"
-	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,169 +29,15 @@ func NewTagsRouter(
 }
 
 func( tr *TagRouter ) Setup() {
+   
+   tr.group.GET("/tags", tr.auth.APIKeyMiddleware(), tr.handler.GetItems) 
 
-   tr.group.GET("/tags", tr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
+   tr.group.GET("/tags/:id", tr.auth.APIKeyMiddleware(), tr.handler.GetItem )
 
-      params := ctx.Request.URL.Query()
+   tr.group.POST("/tags", tr.auth.AuthMiddleware(), tr.handler.CreateItem) 
 
-      data, err := tr.handler.GetItems(params)
+   tr.group.PATCH("/tags/:id", tr.auth.AuthMiddleware(), tr.handler.UpdateItem ) 
 
-      if err != nil {
-         models.ServerError(ctx)
-         return
-      }
-      
-      models.OK(ctx, data)
-   })
-
-   tr.group.GET("/tags/:id", tr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
-
-      tagId := ctx.Param("id")
-
-      data, err := tr.handler.GetItem(tagId)
-
-      if err != nil {
-
-         if err == sql.ErrNoRows {
-            models.NotFound(ctx)
-            return
-         }
-
-         log.Println(err)
-
-         models.ServerError(ctx)
-         return
-      }
-
-      models.OK(ctx, data)
-
-   })
-
-   tr.group.POST("/tags", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-      var body models.TagBody
-
-      if err := ctx.ShouldBindJSON(&body); err != nil {
-         models.InvalidRequest(ctx, err.Error())
-         return
-      }
-
-      // Validate if the tag already exist
-      _, err := tr.handler.SearchItemByName(body.TagName)
-
-      if err != nil {
-
-         if err == sql.ErrNoRows {
-            // if the tag doesn't exists then creates the tag
-
-            data, err := tr.handler.CreateItem(body)
-
-            if err != nil {
-
-               log.Println(err)
-               models.ServerError(ctx)
-               return
-            }
-
-            models.Created(ctx, data)
-            return
-         }
-
-         // server error
-         log.Println(err)
-         models.ServerError(ctx)
-         return
-      } 
-
-      // if the tag exists send 409 CONFLICT
-      models.Conflict(ctx) 
-   })
-
-   tr.group.PATCH("/tags/:id", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-      // We get the request body and path Id
-      var (
-         tagId string
-         body  models.TagBody
-      ) 
-
-      tagId = ctx.Param("id")
-
-      err := ctx.ShouldBindJSON(&body)
-
-      if err != nil {
-
-         log.Println(err)
-         models.InvalidRequest(ctx, err.Error())
-         return
-      }
-
-      // tag validation searching
-      tag, err := tr.handler.GetItem(tagId)
-
-      if err != nil {
-
-         if err == sql.ErrNoRows {
-            models.NotFound(ctx)
-            return
-         }
-
-         log.Println(tag)
-         models.ServerError(ctx)
-         return
-      }
-
-      // if tag exists then validate that the new tagname is unique
-      _, err = tr.handler.SearchItemByName(body.TagName)
-
-      if err != nil {
-
-         if err == sql.ErrNoRows {
-
-            // the updates the tag
-            newTag, err := tr.handler.UpdateItem(body, tagId)
-
-            if err != nil {
-               log.Println(err)
-               models.ServerError(ctx)
-               return
-            }
-
-            models.OK(ctx, newTag)
-            return
-         }
-
-         log.Println(err)
-         models.ServerError(ctx)
-      }
-
-      models.Conflict(ctx)
-   })
-
-   tr.group.DELETE("/tags/:id", tr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-      tagId := ctx.Param("id")
-      _, err := tr.handler.GetItem(tagId)
-
-      if err != nil {
-         if err == sql.ErrNoRows {
-            models.NotFound(ctx)
-            return
-         }
-
-         log.Println(err)
-         models.ServerError(ctx)
-         return
-      }
-
-      success := tr.handler.DeleteItem(tagId)
-
-      if !success {
-         models.ServerError(ctx)
-         return
-      }
-
-      models.OK(ctx, "item deleted!")
-   })
+   tr.group.DELETE("/tags/:id", tr.auth.AuthMiddleware(), tr.handler.DeleteItem )
 }
 
