@@ -2,10 +2,8 @@ package router
 
 import (
 	"50thbeers/auth"
-	"50thbeers/db"
 	"50thbeers/handlers"
 	"50thbeers/models"
-	"50thbeers/utils"
 	"database/sql"
 	"log"
 	"net/http"
@@ -18,396 +16,44 @@ type DrinksRouter struct {
   group       *gin.RouterGroup
   handler     *handlers.DrinksHandler
   auth        *auth.AuthHandler
-  tagsTable   *db.TagsTable
 }
 
 func NewDrinksRouter(
   g  *gin.RouterGroup,
   h  *handlers.DrinksHandler,
   a  *auth.AuthHandler,
-  tt *db.TagsTable,
 ) *DrinksRouter {
 
   return &DrinksRouter{
     group: g, 
     handler: h,
     auth: a,
-    tagsTable: tt,
   }
 } 
 
 func( dr *DrinksRouter ) Setup() {
 
-  // refactor to routes - handler declarations
-  // Example: GET("/drinks", auth.APIKeyMiddleware(), dr.handler.GetItems(ctx))
-  dr.group.GET("/drinks/", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
+  dr.group.GET("/drinks/", dr.auth.APIKeyMiddleware(), dr.handler.GetItems) 
 
-    params := ctx.Request.URL.Query()
+  dr.group.GET("/drinks/:id", dr.auth.APIKeyMiddleware(), dr.handler.GetItem ) 
 
-    data, err := dr.handler.GetItems( params )
+  dr.group.POST("/drinks", dr.auth.AuthMiddleware(), dr.handler.CreateItem )
 
-    if err != nil {
-      models.ServerError(ctx) 
-      return
-    }
+  dr.group.PATCH("/drinks/:id", dr.auth.AuthMiddleware(), dr.handler.UpdateItem ) 
 
-    models.OK(ctx, data)
-  })
+  dr.group.PUT("/drinks/:id/publish", dr.auth.AuthMiddleware(), dr.handler.PublishDrink ) 
 
-  dr.group.GET("/drinks/:id", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
+  dr.group.PUT("/drinks/:id/hide", dr.auth.AuthMiddleware(), dr.handler.HideDrink ) 
 
-    drinkId := ctx.Param("id") 
+  dr.group.DELETE("/drinks/:id", dr.auth.AuthMiddleware(), dr.handler.DeleteDrink ) 
 
-    data, err := dr.handler.GetItem(drinkId) 
-    
-    if err != nil {
+  dr.group.GET("/drinks/:id/tags/", dr.auth.APIKeyMiddleware(), dr.handler.GetItemTags) 
 
-      if err == sql.ErrNoRows {
-        models.NotFound(ctx)
-        return
-      } 
+  dr.group.GET("/drinks/:id/tags/:tagId", dr.auth.APIKeyMiddleware(), dr.handler.GetItemTag) 
 
-      log.Println(err)
-      models.ServerError(ctx)
-      return
-    }
+  dr.group.POST("/drinks/:id/tags/", dr.auth.AuthMiddleware(), dr.handler.CreateItemTag )
 
-    models.OK(ctx, data)
-  })
+  dr.group.PATCH("/drinks/:id/tags/:tagId", dr.auth.AuthMiddleware(), dr.handler.UpdateItemTag ) 
 
-  
-  dr.group.POST("/drinks", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-    var body models.DrinkPostBody
-
-    err := ctx.ShouldBindJSON(&body)
-
-    if err != nil {
-      log.Println(err)
-      models.InvalidRequest(ctx, err.Error())
-      return
-    }
-
-    // generate drinkId
-    drinkId := utils.NameToId(body.DrinkName)
-
-    // validate if drink already exits
-    _, err = dr.handler.GetItem(drinkId)
-
-    if err != nil {
-      
-      // if item don't exist then create it
-      if err == sql.ErrNoRows {
-
-        data, err := dr.handler.CreateItem(body, drinkId)
-
-        if err != nil {
-          log.Println(err)
-          models.ServerError(ctx)
-          return
-        }
-
-        models.Created(ctx, data)
-        return
-      }
-
-      log.Println(err)
-      models.ServerError(ctx)
-      return
-    }
-
-    models.Conflict(ctx)
-    return
-  })
-
-  dr.group.PATCH("/drinks/:id", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-    drinkId := ctx.Param("id")
-
-    var body models.DrinkPatchBody
-    err := ctx.ShouldBindJSON(&body)
-
-    if err != nil {
-      models.InvalidRequest(ctx, err.Error())
-      return
-    }
-  
-    // validate if drink exist
-    _, err = dr.handler.GetItem(drinkId)
-
-    if err != nil {
-      
-      if err == sql.ErrNoRows {
-        models.NotFound(ctx)
-        return
-      }
-
-      log.Println(err)
-      models.ServerError(ctx)
-      return
-    }
-
-    // if drink exist -> updates the data
-    drink, err := dr.handler.UpdateItem(body, drinkId) 
-
-    if err != nil {
-
-      log.Println(err)
-      models.ServerError(ctx)
-      return
-    }
-
-    models.OK(ctx, drink)
-  })
-
-  dr.group.PUT("/drinks/:id/publish", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-    drinkId := ctx.Param("id")
-
-    success := dr.handler.ChangeItemStatus(
-      drinkId,
-      models.DrinksStatuses.Public,
-    )
-
-    if !success {
-      models.ServerError(ctx) 
-      return
-    }
-
-    models.OK(ctx, "Drink successfully publicated")
-
-  })
-
-  dr.group.PUT("/drinks/:id/hide", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-    drinkId := ctx.Param("id")
-
-    success := dr.handler.ChangeItemStatus(
-      drinkId,
-      models.DrinksStatuses.Created,
-    )
-
-    if !success {
-      models.ServerError(ctx) 
-      return
-    }
-
-    models.OK(ctx, "Now the drink is not public!")
-
-  })
-
-  dr.group.DELETE("/drinks/:id", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-
-    drinkId := ctx.Param("id")
-
-    success := dr.handler.ChangeItemStatus(
-      drinkId,
-      models.DrinksStatuses.Deleted,
-    )
-
-    if !success {
-      models.ServerError(ctx) 
-      return
-    }
-
-    models.OK(ctx, "Drink successfully deleted!")
-  })
-
-  dr.group.GET("/drinks/:id/tags/", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
-
-    drinkId := ctx.Param("id")
-    drinkTags, err := dr.handler.GetItemTags(drinkId) 
-
-    if err != nil {
-      models.ServerError(ctx)
-      return
-    }
-
-    models.OK(ctx, drinkTags)
-  })
-
-  dr.group.GET("/drinks/:id/tags/:tagId", dr.auth.APIKeyMiddleware(), func(ctx *gin.Context) {
-
-    drinkId  := ctx.Param("id")
-    strTagId := ctx.Param("tagId")
-
-    tagId, err := strconv.Atoi( strTagId )
-
-    if err != nil {
-      models.InvalidRequest(ctx, err.Error())
-      return
-    }
-
-    tag, err := dr.handler.GetItemTag(drinkId, tagId)
-
-    if err != nil {
-
-      if err == sql.ErrNoRows {
-        models.NotFound(ctx)
-        return
-      }
-
-      log.Println(err)
-      models.ServerError(ctx)
-      return 
-    }
-
-    models.OK(ctx, tag)
-  })
-
-  dr.group.POST("/drinks/:id/tags/", dr.auth.AuthMiddleware(), func(ctx *gin.Context) {
-  
-    var body models.DrinkTagsPostBody
-
-    if err := ctx.ShouldBindJSON(&body); err != nil {
-      models.InvalidRequest(ctx, err.Error())
-      return
-    }
-
-    // validate if tag exist
-    
-    if _, err := dr.tagsTable.GetSingleTag(body.TagId); err != nil {
-
-      ctx.JSON(404, models.BasicResponse{
-        Success: false,
-        Data: "This tag doesn't exist!",
-      })
-      return
-    } 
-
-    drinkId := ctx.Param("id")
-
-    // validate if the tag is already assigned to the drink
-     _, err := dr.handler.GetItemTag(drinkId, body.TagId)
-
-    if err != nil {
-
-      if err == sql.ErrNoRows {
-
-        // add the tag
-        newTag, err := dr.handler.CreateItemTag(body, drinkId) 
-
-        if err != nil {
-
-          log.Println(err)
-          models.ServerError(ctx)
-          return
-        }
-
-        models.Created(ctx, newTag)
-        return
-      }
-
-      log.Println(err)
-      models.ServerError(ctx)
-      return
-    }
-
-    models.Conflict(ctx)
-  })
-
-  dr.group.PATCH("/drinks/:id/tags/:tagId", func(ctx *gin.Context) {
-    
-    params := ctx.Params
-    drinkId, exist := params.Get("id")
-
-    if !exist {
-
-      models.InvalidRequest(ctx, "Drink id most be provided")
-      return
-    }
-
-    strTagId, exist := params.Get("tagId")
-
-    if !exist {
-
-      models.InvalidRequest(ctx, "Tag id most be provided")
-      return
-    }
-
-    tagId, err := strconv.Atoi(strTagId)
-
-    if err != nil {
-
-      models.InvalidRequest(ctx, err.Error())
-      return
-    }
-
-    var body models.DrinkTagsPostBody
-    err = ctx.ShouldBindJSON(&body)
-
-    if err != nil {
-
-      models.InvalidRequest(ctx, err.Error())
-      return
-    }
-
-    // validate that the tag exists
-
-    if _, err := dr.tagsTable.GetSingleTag(body.TagId); err != nil {
-
-      if err == sql.ErrNoRows {
-
-        ctx.JSON(http.StatusNotFound, models.BasicResponse{
-          Success: false,
-          Data: "This tag doesn't exist!",
-        })
-        return
-      }
-
-      log.Println(err)
-      models.ServerError(ctx)
-      return
-    } 
-
-    // validate if the drink already has the new tag provided
-    if _, err := dr.handler.GetItemTag(drinkId, body.TagId); err != nil {
-
-      if err == sql.ErrNoRows {
-        
-        // validate the current tag is actually assigned 
-
-        _, err := dr.handler.GetItemTag(drinkId, tagId)
-
-        if err != nil {
-
-          if err == sql.ErrNoRows {
-            
-            ctx.JSON(http.StatusNotFound, models.BasicResponse{
-              Success: false,
-              Data: "The drink does not have the tag to be changed",
-            })
-            
-            return
-          }
-
-          models.ServerError(ctx)
-          log.Println(err)
-          return
-        }
-
-        data, err := dr.handler.UpdateItemTag(body,tagId, drinkId)
-
-        if err != nil {
-          models.ServerError(ctx)
-          log.Println(err)
-          return
-        }
-
-        models.OK(ctx, data)
-        return
-      } 
-
-      models.ServerError(ctx)
-      log.Println(err)
-      return
-    }
-
-    ctx.JSON(http.StatusConflict, models.BasicResponse{
-      Success: false,
-      Data: "The drink already has this tag",
-    })
-  })
-
-  dr.group.DELETE("/drinks/:id/tags/:tagId", dr.auth.AuthMiddleware(), dr.handler.DeleteItemTag)
+  dr.group.DELETE("/drinks/:id/tags/:tagId", dr.auth.AuthMiddleware(), dr.handler.DeleteItemTag )
 }
