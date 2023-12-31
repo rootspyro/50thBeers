@@ -13,3 +13,6 @@ brun: build
 
 run:
 	./bin/$(bin)
+
+dev:
+	go run cmd/main.go
