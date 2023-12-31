@@ -3,9 +3,11 @@ package handlers
 import (
 	"50thbeers/db"
 	"50thbeers/models"
-	"log"
-	"net/url"
+	"50thbeers/utils"
+	"database/sql"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 
@@ -19,61 +21,173 @@ func NewTagsHandler( table *db.TagsTable ) *TagsHandler {
    }
 }
 
-func( th *TagsHandler ) GetItems(params url.Values) (models.TagCollection, error) {
+func( th *TagsHandler ) GetItems( ctx *gin.Context ) {
 
-   data, itemsFound, err := th.tagsTable.GetAllTags( params )
-   
-   var tags models.TagCollection
+  params := ctx.Request.URL.Query()
 
-   if err != nil {
-      log.Println(err)
-      return tags, err 
-   }
+  data, itemsFound, err := th.tagsTable.GetAllTags(params)
 
-   tags = models.TagCollection{
-      ItemsFound: itemsFound,
-      Items: data,
-      Filters: th.tagsTable.Filters,
-   }
+  if err != nil {
+    utils.ServerError(ctx, err)
+    return
+  }
 
-   return tags, nil
+  tags := models.TagCollection {
+    ItemsFound: itemsFound,
+    Items: data,
+    Filters: th.tagsTable.Filters,
+  }
+
+  models.OK(ctx, tags)
 }
 
-func( th *TagsHandler ) GetItem( tagId string ) (models.Tag, error) {
+func( th *TagsHandler ) GetItem( ctx *gin.Context ) {
 
-   tagIdInt, _ := strconv.Atoi(tagId)
+  tagId, err := strconv.Atoi(ctx.Param("id"))
 
-   data, err := th.tagsTable.GetSingleTag(tagIdInt)
+  if err != nil {
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
 
-   return data, err
+  tag, err := th.tagsTable.GetSingleTag(tagId) 
+
+  if err != nil {
+
+    if err == sql.ErrNoRows {
+      models.NotFound(ctx)
+      return
+    }
+
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.OK(ctx, tag)
+
 }
 
-func( th *TagsHandler ) SearchItemByName( name string ) ( models.Tag, error ) {
+func( th *TagsHandler ) CreateItem( ctx *gin.Context ) {
 
-   return th.tagsTable.SearchTagByName(name)
+  var body models.TagBody
+
+  if err := ctx.ShouldBindJSON(&body); err != nil {
+    models.InvalidRequest(ctx, err.Error())
+  }
+
+  // validate that the tag to create doesn't exist already 
+
+  _, err := th.tagsTable.SearchTagByName(body.TagName)
+
+  if err == nil {
+    models.Conflict(ctx)
+    return
+  }
+
+  if err != sql.ErrNoRows {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  newTag, err := th.tagsTable.CreateTag(body) 
+
+  if err != nil {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.Created(ctx, newTag)
 }
 
-func( th *TagsHandler ) CreateItem( data models.TagBody ) (models.Tag, error) {
+func( th *TagsHandler ) UpdateItem( ctx *gin.Context ) {
 
-   return th.tagsTable.CreateTag(data) 
+  var body models.TagBody
+
+  tagId, err := strconv.Atoi(ctx.Param("id"))
+
+  if err != nil {
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
+
+  if err := ctx.ShouldBindJSON(&body); err != nil {
+
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
+
+  // validate the tag actually exist
+  _, err = th.tagsTable.GetSingleTag(tagId)
+
+  if err != nil {
+
+    if err == sql.ErrNoRows {
+      models.NotFound(ctx)
+      return
+    }
+
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  // validate that the tag is unique
+  _, err = th.tagsTable.SearchTagByName(body.TagName)
+
+  if err == nil {
+    models.Conflict(ctx)
+    return
+  }
+
+  if err != sql.ErrNoRows {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  // Updates the tag
+
+  tag, err := th.tagsTable.UpdateTag(body, tagId)
+
+  if err != nil {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.OK(ctx, tag)
+
 }
 
-func( th *TagsHandler ) UpdateItem( data models.TagBody, tagId string ) ( models.Tag, error ) {
+func( th *TagsHandler ) DeleteItem( ctx *gin.Context ) {
 
-   tagIdInt, _ := strconv.Atoi(tagId)
+  tagId, err := strconv.Atoi(ctx.Param("id"))
 
-   return th.tagsTable.UpdateTag(data, tagIdInt)
-}
+  if err != nil {
+    models.InvalidRequest(ctx, err)
+    return
+  }
 
-func( th *TagsHandler ) DeleteItem( tagId string ) bool {
+  // validate the tag exist
 
-   tagIdInt, _ := strconv.Atoi(tagId)
+  _, err = th.tagsTable.GetSingleTag(tagId)
 
-   success, err := th.tagsTable.DeleteTag(tagIdInt)
+  if err != nil {
 
-   if err != nil {
-      log.Println(err)
-   }
+    if err == sql.ErrNoRows {
 
-   return success
+      models.NotFound(ctx)
+      return
+    }
+
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  // Deletes the tag
+  err = th.tagsTable.DeleteTag(tagId)
+
+  if err != nil {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.OK(ctx, "Tag successfully deleted!")
 }

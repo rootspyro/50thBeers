@@ -267,40 +267,8 @@ func( lt *LocationsTable ) UpdateLocation( body models.LocationPatchBody, locati
   return lt.GetSingleLocation(locationId)
 }
 
-func( lt *LocationsTable ) PublicateLocation( locationId string ) ( bool, error ) {
-
-  timestamp := time.Now()
-  formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
-
-  query := fmt.Sprintf(
-    `
-      Update %s
-      Set 
-        status = '%s',
-        publicated_at = '%s',
-        updated_at = '%s'
-      Where
-        id = '%s'
-    `,
-    lt.Table,
-    models.LocationsStatuses.Public,
-    formattedTimestamp,
-    formattedTimestamp,
-    locationId,
-  )
-
-  _, err := lt.db.Conn.Exec(query)
-
-  if err != nil {
-    return false, err
-  }
-
-  return true, nil
+func( lt *LocationsTable ) ChangeStatus( locationId, status string ) error {
   
-}
-
-func ( lt *LocationsTable ) HideLocation( locationId string ) ( bool, error ) {
-
   timestamp := time.Now()
   formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
 
@@ -310,49 +278,29 @@ func ( lt *LocationsTable ) HideLocation( locationId string ) ( bool, error ) {
       Set 
         status = '%s',
         updated_at = '%s'
-      Where
-        id = '%s'
     `,
     lt.Table,
-    models.LocationsStatuses.Created,
+    status,
     formattedTimestamp,
-    locationId,
   )
 
-  _, err := lt.db.Conn.Exec(query)
-
-  if err != nil {
-    return false, err
+  if status == models.LocationsStatuses.Public {
+    query += fmt.Sprintf(
+      `, publicated_at = '%s'`, 
+      formattedTimestamp,
+    )
   }
 
-  return true, nil
-}
-
-func ( lt *LocationsTable ) DeleteLocation( locationId string ) ( bool, error ) {
-
-  timestamp := time.Now()
-  formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
-
-  query := fmt.Sprintf(
+  query += fmt.Sprintf(
     `
-      Update %s
-      Set 
-        status = '%s',
-        updated_at = '%s'
-      Where
-        id = '%s'
+      Where id = '%s'
     `,
-    lt.Table,
-    models.LocationsStatuses.Deleted,
-    formattedTimestamp,
     locationId,
   )
 
   _, err := lt.db.Conn.Exec(query)
 
-  if err != nil {
-    return false, err
-  }
+  return err
 
-  return true, nil
 }
+

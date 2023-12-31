@@ -203,7 +203,7 @@ func( ct *CountriesTable ) UpdateCountry(body models.CountryBody, countryId int)
          Update
             %s
          Set
-            country_name = '%s'
+            country_name = '%s',
             updated_at = '%s'
          Where
             id = '%d'
@@ -225,7 +225,7 @@ func( ct *CountriesTable ) UpdateCountry(body models.CountryBody, countryId int)
    return country, err
 }
 
-func( ct *CountriesTable ) DeleteCountry(countryId int) ( bool, error ) {
+func( ct *CountriesTable ) DeleteCountry(countryId int) error {
 
    query := fmt.Sprintf(
       `
@@ -239,9 +239,5 @@ func( ct *CountriesTable ) DeleteCountry(countryId int) ( bool, error ) {
 
    _, err := ct.db.Conn.Exec(query)
 
-   if err != nil {
-      return false, err
-   }
-
-   return true, nil
+   return err
 }

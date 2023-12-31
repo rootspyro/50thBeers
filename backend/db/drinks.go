@@ -515,7 +515,7 @@ func(dt *DrinksTable) UpdateDrink( body models.DrinkPatchBody, drinkId string ) 
   return dt.GetSingleDrink(drinkId)
 }
 
-func(dt *DrinksTable) ChangeStatus( drinkId string, status string ) (bool, error) {
+func(dt *DrinksTable) ChangeStatus( drinkId string, status string ) error {
 
   timestamp := time.Now()
   formattedTimestamp := timestamp.Format("2006-01-02 15:04:05")
@@ -548,11 +548,7 @@ func(dt *DrinksTable) ChangeStatus( drinkId string, status string ) (bool, error
 
   _, err := dt.db.Conn.Exec(query)
 
-  if err != nil {
-    return false, err
-  }
-
-  return true, nil
+  return err
 }
 
 func(dt *DrinksTable ) GetDrinkTags(drinkId string) ([]models.DrinkTags, int, error)  {

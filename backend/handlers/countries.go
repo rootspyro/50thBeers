@@ -3,9 +3,11 @@ package handlers
 import (
 	"50thbeers/db"
 	"50thbeers/models"
-	"log"
-	"net/url"
+	"50thbeers/utils"
+	"database/sql"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type CountriesHandler struct {
@@ -18,54 +20,173 @@ func NewCountriesHandler( table *db.CountriesTable ) *CountriesHandler {
    }
 }
 
-func( ch *CountriesHandler ) GetItems(params url.Values) ( models.CountryCollection, error ) {
+func( ch *CountriesHandler ) GetItems(ctx *gin.Context) {
+  
+  params := ctx.Request.URL.Query()
 
-   data, itemsFound, err := ch.countriesTable.GetAllCountries( params )
+  data, itemsFound, err := ch.countriesTable.GetAllCountries(params)
 
-   var countries models.CountryCollection
+  if err != nil {
 
-   if err != nil {
-      log.Println(err)
-      return countries, err
-   }
+    utils.ServerError(ctx, err)
+    return
+  }
 
-   countries.ItemsFound = itemsFound
-   countries.Items = data
-   countries.Filters = ch.countriesTable.Filters
+  // build response
+  countries := models.CountryCollection {
+    ItemsFound: itemsFound,
+    Items: data,
+    Filters: ch.countriesTable.Filters,
+  }
 
-   return countries, err
+  models.OK(ctx, countries)
 }
 
-func( ch *CountriesHandler ) GetItem( countryId string ) ( models.Country, error ) {
+func( ch *CountriesHandler ) GetItem( ctx *gin.Context ) {
 
-   countryIdInt, _ := strconv.Atoi(countryId)
-   return ch.countriesTable.GetSingleCountry(countryIdInt)
+  countryId, err := strconv.Atoi(ctx.Param("id"))
+
+  if err != nil {
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
+
+  data, err := ch.countriesTable.GetSingleCountry(countryId)
+
+  if err != nil {
+
+    if err == sql.ErrNoRows {
+      models.NotFound(ctx)
+      return
+    }
+
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.OK(ctx, data)
 }
 
-func( ch *CountriesHandler ) SearchItemByName( name string ) ( models.Country, error ) {
-   
-   return ch.countriesTable.SearchCountryByName(name)
+
+func( ch *CountriesHandler ) CreateItem( ctx *gin.Context ) {
+
+  var body models.CountryBody
+
+  if err := ctx.ShouldBindJSON(&body); err != nil {
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
+
+  // Validate if country actually exist
+  _, err := ch.countriesTable.SearchCountryByName(body.CountryName)
+
+  if err == nil {
+    models.Conflict(ctx)
+    return
+  }
+
+  if err != sql.ErrNoRows {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  newCountry, err := ch.countriesTable.CreateCountry(body)
+
+  if err != nil {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.Created(ctx, newCountry)
 }
 
-func( ch *CountriesHandler ) CreateItem( body models.CountryBody ) ( models.Country, error ) {
+func( ch *CountriesHandler ) UpdateItem( ctx *gin.Context ) {
 
-   return ch.countriesTable.CreateCountry(body)
+  var body      models.CountryBody
+
+  countryId, err := strconv.Atoi(ctx.Param("id"))
+
+  // get and validate params and body
+  if err != nil {
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
+
+  if err := ctx.ShouldBindJSON(&body); err != nil {
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
+
+  // country validation
+  _, err = ch.countriesTable.GetSingleCountry(countryId)
+
+  if err != nil {
+    
+    if err == sql.ErrNoRows {
+      models.NotFound(ctx)
+      return
+    }
+
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  // if the country actually exist -> validate that the new country name is unique
+  _, err = ch.countriesTable.SearchCountryByName(body.CountryName)
+
+  if err != nil {
+    
+    if err == sql.ErrNoRows {
+
+      country, err := ch.countriesTable.UpdateCountry(body, countryId)
+
+      if err != nil {
+        utils.ServerError(ctx, err)
+        return
+      }
+
+      models.OK(ctx, country)
+      return
+    }
+
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.Conflict(ctx)
+  return
 }
 
-func( ch *CountriesHandler ) UpdateItem( countryId string, body models.CountryBody ) ( models.Country, error ) {
 
-   countryIdInt, _ := strconv.Atoi(countryId)
-   return ch.countriesTable.UpdateCountry(body, countryIdInt)
-}
+func( ch *CountriesHandler ) DeleteItem( ctx *gin.Context ) {
 
-func( ch *CountriesHandler ) DeleteItem(countryId string) bool {
+  countryId, err := strconv.Atoi(ctx.Param("id"))
 
-   countryIdInt, _ := strconv.Atoi(countryId)
-   success, err := ch.countriesTable.DeleteCountry(countryIdInt)
+  if err != nil {
 
-   if err != nil {
-      log.Println(err)
-   }
+    models.InvalidRequest(ctx, err.Error())
+    return
+  }
 
-   return success
+  _, err = ch.countriesTable.GetSingleCountry(countryId)
+
+  if err != nil {
+
+    if err == sql.ErrNoRows {
+      models.NotFound(ctx)
+      return
+    }
+
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  err = ch.countriesTable.DeleteCountry(countryId)
+
+  if err != nil {
+    utils.ServerError(ctx, err)
+    return
+  }
+
+  models.OK(ctx, "Country successfully deleted")
 }
