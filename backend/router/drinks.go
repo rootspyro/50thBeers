@@ -3,11 +3,6 @@ package router
 import (
 	"50thbeers/auth"
 	"50thbeers/handlers"
-	"50thbeers/models"
-	"database/sql"
-	"log"
-	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
